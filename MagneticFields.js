@@ -190,6 +190,7 @@ var init = () => {
         velocityTerm.canBeRefunded = (_) => (deltaVariable.level == 0);
         velocityTerm.boughtOrRefunded = (_) => {
             theory.invalidatePrimaryEquation();
+            theory.invalidateSecondaryEquation();
             theory.invalidateQuaternaryValues();
             updateAvailability();
         }
@@ -201,8 +202,7 @@ var init = () => {
         deltaVariable.info = Localization.getUpgradeAddTermInfo("\\delta");
         deltaVariable.canBeRefunded = (_) => (xExp.level + omegaExp.level + vExp.level + a1Exp.level == 0);
         deltaVariable.boughtOrRefunded = (_) => {
-            theory.invalidatePrimaryEquation();
-            theory.invalidateQuaternaryValues();
+            theory.invalidateTertiaryEquation();
             updateAvailability();
         }
     }
