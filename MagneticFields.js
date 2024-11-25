@@ -349,7 +349,7 @@ var getSecondaryEquation = () => {
             result += `v_y = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
             result += `v_z = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
         }
-        result += `\\dot{I} = {a_1}\\left(1 - 10^{-15}\\times\\frac{I}{a_2}\\right)\\\\`;
+        result += `\\dot{I} = {a_1}\\left(1 - 10^{15}\\times\\frac{I}{a_2}\\right)\\\\`;
     }
     else
     {
@@ -483,7 +483,7 @@ var getOmegaexp = () => (BigNumber.TWO);
 var getVexp = () => (BigNumber.TWO);
 var getA1exp = () => (BigNumber.ONE);
 
-var getC = () => BigNumber.from(1e52);
+var getC = () => BigNumber.from(1e113);
 var getQ = () => q0;
 var getM = () => BigNumber.ONE;
 
