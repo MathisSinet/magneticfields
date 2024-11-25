@@ -16,7 +16,7 @@ const pubExponent = 0.1;
 const mu0 = BigNumber.FOUR * BigNumber.PI * BigNumber.from(1e-7);
 const q0 = BigNumber.from(1.602e-19);
 
-const i0 = BigNumber.from(1e-12);
+const i0 = BigNumber.from(1e-15);
 
 // Debug tools
 var debugFlag = 1;
@@ -318,7 +318,7 @@ var getPrimaryEquation = () => {
     if (stage == 0)
     {
         theory.primaryEquationHeight = 85;
-        theory.primaryEquationScale = 0.95;
+        theory.primaryEquationScale = velocityTerm.level > 0 ? 0.95 : 1.05;
         result += `\\dot{x} = v_x\\\\`;
         result += `B = {{\\mu}_0}{I}{\\delta}\\\\`;
         result += `\\omega = \\frac{q}{m}{B}`;
@@ -339,19 +339,21 @@ var getSecondaryEquation = () => {
 
     if (stage == 0)
     {
-        theory.secondaryEquationHeight = 100;
-        theory.secondaryEquationScale = 0.9;
+        theory.secondaryEquationHeight = 70;
+        theory.secondaryEquationScale = 1;
         result += `v_x = [{v_1}{v_2}\\times{10^{-18}}]({t_s}=0)\\\\`;
         if (velocityTerm.level > 0)
         {
+            theory.secondaryEquationHeight = 100;
+            theory.secondaryEquationScale = 0.9;
             result += `v_y = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
             result += `v_z = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
         }
-        result += `\\dot{I} = {a_1}\\left(1 - \\frac{I}{a_2}\\right)\\\\`;
+        result += `\\dot{I} = {a_1}\\left(1 - 10^{-15}\\times\\frac{I}{a_2}\\right)\\\\`;
     }
     else
     {
-        theory.secondaryEquationHeight = 75;
+        theory.secondaryEquationHeight = 65;
         theory.secondaryEquationScale = 1.1;
         if (velocityTerm.level > 0)
         {
@@ -421,7 +423,7 @@ var getQuaternaryEntries = () => {
         quaternaryEntries[1].value = t.toString(2);
         quaternaryEntries[2].value = rhodot.toString(2);
         quaternaryEntries[3].value = paramRepr(x, 2);
-        quaternaryEntries[3].value = paramRepr(omega, 2);
+        quaternaryEntries[4].value = paramRepr(omega, 2);
         if (velocityTerm.level == 1) {quaternaryEntries[5].value = paramRepr(vtot, 3);}
     }
 
@@ -481,7 +483,7 @@ var getOmegaexp = () => (BigNumber.TWO);
 var getVexp = () => (BigNumber.TWO);
 var getA1exp = () => (BigNumber.ONE);
 
-var getC = () => BigNumber.from(1e34);
+var getC = () => BigNumber.from(1e52);
 var getQ = () => q0;
 var getM = () => BigNumber.ONE;
 
