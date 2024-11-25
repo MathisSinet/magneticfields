@@ -118,7 +118,7 @@ var init = () => {
 
     // delta
     {
-        let getDesc = (level) => "\\delta=" + getDelta(level).toString(0);
+        let getDesc = (level) => "{\\delta}=" + getDelta(level).toString(0);
         delta = theory.createUpgrade(5, currency, new ExponentialCost(1e5, Math.log2(1e3)));
         delta.getDescription = (_) => Utils.getMath(getDesc(delta.level));
         delta.getInfo = (amount) => Utils.getMathTo(getDesc(delta.level), getDesc(delta.level + amount));
@@ -216,8 +216,8 @@ var init = () => {
 
     {
         omegaExp = theory.createMilestoneUpgrade(3, 2);
-        omegaExp.description = Localization.getUpgradeIncCustomExpDesc("\\omega", "0.05");
-        omegaExp.info = Localization.getUpgradeIncCustomExpInfo("\\omega", "0.05");
+        omegaExp.description = Localization.getUpgradeIncCustomExpDesc("\\omega ", "0.05");
+        omegaExp.info = Localization.getUpgradeIncCustomExpInfo("\\omega ", "0.05");
         omegaExp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
     }
 
@@ -254,8 +254,8 @@ var updateAvailability = () => {
     deltaVariable.isAvailable = velocityTerm.level > 0;
     xExp.isAvailable = deltaVariable.level > 0;
     omegaExp.isAvailable = deltaVariable.level > 0;
+    vExp.isAvailable = deltaVariable.level > 0;
     a1Exp.isAvailable = deltaVariable.level > 0;
-    xExp.isAvailable = deltaVariable.level > 0;
 
     delta.isAvailable = deltaVariable.level > 0;
     v3.isAvailable = velocityTerm.level > 0;
