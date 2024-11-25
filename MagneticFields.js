@@ -320,7 +320,7 @@ var getPrimaryEquation = () => {
         theory.primaryEquationHeight = 85;
         theory.primaryEquationScale = 0.95;
         result += `\\dot{x} = v_x\\\\`;
-        result += `\\B = {{\\mu}_0}{I}{\\delta}\\\\`;
+        result += `B = {{\\mu}_0}{I}{\\delta}\\\\`;
         result += `\\omega = \\frac{q}{m}{B}`;
     }
     else
