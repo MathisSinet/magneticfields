@@ -218,8 +218,8 @@ var init = () => {
 
     {
         omegaExp = theory.createMilestoneUpgrade(3, 2);
-        omegaExp.description = Localization.getUpgradeIncCustomExpDesc("\\omega ", "0.05");
-        omegaExp.info = Localization.getUpgradeIncCustomExpInfo("\\omega ", "0.05");
+        omegaExp.description = Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.05");
+        omegaExp.info = Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.05");
         omegaExp.boughtOrRefunded = (_) => {
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
@@ -322,7 +322,7 @@ var getPrimaryEquation = () => {
     {
         theory.primaryEquationHeight = 85;
         theory.primaryEquationScale = velocityTerm.level > 0 ? 0.95 : 1.05;
-        result += `\\x = {v_x}{t_s}\\\\`;
+        result += `x = {v_x}{t_s}\\\\`;
         result += `B = {{\\mu}_0}{I}{\\delta}\\\\`;
         result += `\\omega = \\frac{q}{m}{B}`;
     }
