@@ -55,7 +55,7 @@ var chapter1, chapter2;
 var resetSimulation = () => {
     ts = BigNumber.ZERO;
     x = BigNumber.ZERO;
-    vx = (getV1(v1.level) * getV2(v2.level)) * BigNumber.from("1e-18");
+    vx = (getV1(v1.level) * getV2(v2.level)) * BigNumber.from("1e-20");
     vz = (getV3(v1.level) * getV4(v2.level)) * BigNumber.from("1e-18");
     vtot = (vx.pow(BigNumber.TWO) + BigNumber.TWO * vz.pow(BigNumber.TWO)).sqrt();
     theory.invalidateQuaternaryValues();
@@ -85,16 +85,16 @@ var init = () => {
     // tvar
     {
         let getDesc = (level) => "\\dot{t}=" + getTdot(level).toString(1);
-        tvar = theory.createUpgrade(1, currency, new ExponentialCost(1e4, Math.log2(1e4)));
+        tvar = theory.createUpgrade(1, currency, new ExponentialCost(1e10, Math.log2(1e25)));
         tvar.getDescription = (_) => Utils.getMath(getDesc(tvar.level));
         tvar.getInfo = (amount) => Utils.getMathTo(getDesc(tvar.level), getDesc(tvar.level + amount));
-        tvar.maxLevel = 4;
+        tvar.maxLevel = 16;
     }
 
     // c1
     {
         let getDesc = (level) => "c_1=" + getC1(level).toString(0);
-        c1 = theory.createUpgrade(2, currency, new FirstFreeCost(new ExponentialCost(10, Math.log2(2.4))));
+        c1 = theory.createUpgrade(2, currency, new FirstFreeCost(new ExponentialCost(10, Math.log2(2))));
         c1.getDescription = (_) => Utils.getMath(getDesc(c1.level));
         c1.getInfo = (amount) => Utils.getMathTo(getDesc(c1.level), getDesc(c1.level + amount));
     }
@@ -127,16 +127,16 @@ var init = () => {
     // v1
     {
         let getDesc = (level) => "v_1=" + getV1(level).toString(0);
-        v1 = theory.createUpgrade(6, currency, new ExponentialCost(15, Math.log2(3)));
+        v1 = theory.createUpgrade(6, currency, new ExponentialCost(100, Math.log2(90)));
         v1.getDescription = (_) => Utils.getMath(getDesc(v1.level));
         v1.getInfo = (amount) => Utils.getMathTo(getDesc(v1.level), getDesc(v1.level + amount));
     }
 
     // v2
     {
-        let getDesc = (level) => "v_2=2^{" + level + "}";
+        let getDesc = (level) => "v_2={1.3}^{" + level + "}";
         let getInfo = (level) => "v_2=" + getV2(level).toString(0);
-        v2 = theory.createUpgrade(7, currency, new ExponentialCost(1e3, Math.log2(100)));
+        v2 = theory.createUpgrade(7, currency, new ExponentialCost(1e5, 8*Math.log2(10)));
         v2.getDescription = (_) => Utils.getMath(getDesc(v2.level));
         v2.getInfo = (amount) => Utils.getMathTo(getInfo(v2.level), getInfo(v2.level + amount));
     }
@@ -187,7 +187,7 @@ var init = () => {
         velocityTerm = theory.createMilestoneUpgrade(0, 1);
         velocityTerm.description = Localization.getUpgradeAddTermDesc("v");
         velocityTerm.info = Localization.getUpgradeAddTermInfo("v");
-        velocityTerm.canBeRefunded = (_) => (deltaVariable.level == 0);
+        velocityTerm.canBeRefunded = (_) => (vExp.level == 0);
         velocityTerm.boughtOrRefunded = (_) => {
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
@@ -200,7 +200,6 @@ var init = () => {
         deltaVariable = theory.createMilestoneUpgrade(1, 1);
         deltaVariable.description = Localization.getUpgradeAddTermDesc("\\delta");
         deltaVariable.info = Localization.getUpgradeAddTermInfo("\\delta");
-        deltaVariable.canBeRefunded = (_) => (xExp.level + omegaExp.level + vExp.level + a1Exp.level == 0);
         deltaVariable.boughtOrRefunded = (_) => {
             theory.invalidateTertiaryEquation();
             updateAvailability();
@@ -211,21 +210,30 @@ var init = () => {
         xExp = theory.createMilestoneUpgrade(2, 2);
         xExp.description = Localization.getUpgradeIncCustomExpDesc("x", "0.05");
         xExp.info = Localization.getUpgradeIncCustomExpInfo("x", "0.05");
-        xExp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
+        xExp.boughtOrRefunded = (_) => {
+            theory.invalidatePrimaryEquation();
+            theory.invalidateSecondaryEquation();
+        }
     }
 
     {
         omegaExp = theory.createMilestoneUpgrade(3, 2);
         omegaExp.description = Localization.getUpgradeIncCustomExpDesc("\\omega ", "0.05");
         omegaExp.info = Localization.getUpgradeIncCustomExpInfo("\\omega ", "0.05");
-        omegaExp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
+        omegaExp.boughtOrRefunded = (_) => {
+            theory.invalidatePrimaryEquation();
+            theory.invalidateSecondaryEquation();
+        }
     }
 
     {
         vExp = theory.createMilestoneUpgrade(4, 2);
         vExp.description = Localization.getUpgradeIncCustomExpDesc("v", "0.05");
         vExp.info = Localization.getUpgradeIncCustomExpInfo("v", "0.05");
-        vExp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
+        vExp.boughtOrRefunded = (_) => {
+            theory.invalidatePrimaryEquation();
+            theory.invalidateSecondaryEquation();
+        }
     }
 
     {
@@ -251,11 +259,7 @@ var init = () => {
 }
 
 var updateAvailability = () => {
-    deltaVariable.isAvailable = velocityTerm.level > 0;
-    xExp.isAvailable = deltaVariable.level > 0;
-    omegaExp.isAvailable = deltaVariable.level > 0;
-    vExp.isAvailable = deltaVariable.level > 0;
-    a1Exp.isAvailable = deltaVariable.level > 0;
+    vExp.isAvailable = velocityTerm.level > 0;
 
     delta.isAvailable = deltaVariable.level > 0;
     v3.isAvailable = velocityTerm.level > 0;
@@ -264,9 +268,8 @@ var updateAvailability = () => {
 
 
 var tick = (elapsedTime, multiplier) => {
-    if (c1.level == 0) return;
-
     if (vx == BigNumber.ZERO) resetSimulation();
+    if (c1.level == 0) return;
 
     let dt = BigNumber.from(elapsedTime * multiplier);
     if (debugFlag) dt *= getDebugMult(debugMultUpgrade.level);
@@ -278,9 +281,9 @@ var tick = (elapsedTime, multiplier) => {
 
     t += dt * getTdot(tvar.level);
     ts += dt * getTdot(tvar.level);
-    x += dt * vx;
+    x += dt * getTdot(tvar.level) * vx;
     
-    let dI = va1 * (BigNumber.ONE - I/(va2*i0));
+    let dI = va1 * (i0 - I/va2);
     I += dI.min(BigNumber.ZERO);
     I = I.max(va2*i0);
     B = mu0 * I * getDelta(delta.level);
@@ -301,7 +304,7 @@ var tick = (elapsedTime, multiplier) => {
 var paramRepr = (value, decimals) => {
     if (value > BigNumber.from(0.01) || value == BigNumber.ZERO) 
     {
-        return value.toString(decimals);
+        return value.toString(decimals+1);
     }
     else
     {
@@ -319,7 +322,7 @@ var getPrimaryEquation = () => {
     {
         theory.primaryEquationHeight = 85;
         theory.primaryEquationScale = velocityTerm.level > 0 ? 0.95 : 1.05;
-        result += `\\dot{x} = v_x\\\\`;
+        result += `\\x = {v_x}{t_s}\\\\`;
         result += `B = {{\\mu}_0}{I}{\\delta}\\\\`;
         result += `\\omega = \\frac{q}{m}{B}`;
     }
@@ -341,7 +344,7 @@ var getSecondaryEquation = () => {
     {
         theory.secondaryEquationHeight = 70;
         theory.secondaryEquationScale = 1;
-        result += `v_x = [{v_1}{v_2}\\times{10^{-18}}]({t_s}=0)\\\\`;
+        result += `v_x = [{v_1}{v_2}\\times{10^{-20}}]({t_s}=0)\\\\`;
         if (velocityTerm.level > 0)
         {
             theory.secondaryEquationHeight = 100;
@@ -349,7 +352,7 @@ var getSecondaryEquation = () => {
             result += `v_y = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
             result += `v_z = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
         }
-        result += `\\dot{I} = {a_1}\\left(1 - 10^{15}\\times\\frac{I}{a_2}\\right)\\\\`;
+        result += `\\dot{I} = {a_1}\\left(10^{15} - \\frac{I}{a_2}\\right)\\\\`;
     }
     else
     {
@@ -383,7 +386,6 @@ var getTertiaryEquation = () => {
         result = `${theory.latexSymbol}=\\max\\rho^{${tauRate}}`;
     }
     
-
     return result;
 }
 
@@ -474,9 +476,9 @@ var postPublish = () => {
 var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
 
 
-var getDebugMult = (level) => Utils.getStepwisePowerSum(level, 9, 5, 1);
+var getDebugMult = (level) => Utils.getStepwisePowerSum(level, 10, 9, 1);
 
-var getTdot = (level) => BigNumber.from(0.2 + level / 5);
+var getTdot = (level) => BigNumber.from(0.2 + level / 20);
 
 var getXexp = () => (BigNumber.TWO);
 var getOmegaexp = () => (BigNumber.TWO);
@@ -485,14 +487,14 @@ var getA1exp = () => (BigNumber.ONE);
 
 var getC = () => BigNumber.from(1e113);
 var getQ = () => q0;
-var getM = () => BigNumber.ONE;
+var getM = () => BigNumber.from(1e-3);
 
-var getC1 = (level) => Utils.getStepwisePowerSum(level, 2, 10, 0);
+var getC1 = (level) => Utils.getStepwisePowerSum(level, 2, 7, 0);
 var getA1 = (level) => Utils.getStepwisePowerSum(level, 2, 10, 1);
 var getA2 = (level) => BigNumber.TWO.pow(level);
 var getDelta = (level) => deltaVariable.level > 0 ? Utils.getStepwisePowerSum(level, 2, 10, 1) : BigNumber.ONE;
-var getV1 = (level) => Utils.getStepwisePowerSum(level, 2, 10, 1);
-var getV2 = (level) => BigNumber.TWO.pow(level);
+var getV1 = (level) => Utils.getStepwisePowerSum(level, 2, 25, 1);
+var getV2 = (level) => BigNumber.from(1.3).pow(level);
 var getV3 = (level) => Utils.getStepwisePowerSum(level, 2, 10, 0);
 var getV4 = (level) => BigNumber.TWO.pow(level);
 
