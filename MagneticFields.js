@@ -298,7 +298,7 @@ var tick = (elapsedTime, multiplier) => {
     x += dt * getTdot(tvar.level) * vx;
     
     let dI = va1 * BigNumber.from(1e-2) * (i0 - I/va2);
-    I += dI.min(BigNumber.ZERO);
+    I += dI.max(BigNumber.ZERO);
     I = I.min(va2*i0);
     B = mu0 * I * getDelta(delta.level);
     omega = (getQ() / getM()) * B;
