@@ -17,6 +17,7 @@ const mu0 = BigNumber.FOUR * BigNumber.PI * BigNumber.from(1e-7);
 const q0 = BigNumber.from(1.602e-19);
 
 const i0 = BigNumber.from(1e-15);
+const defaultmass = BigNumber.from(1e-4)
 
 // Debug tools
 var debugFlag = 1;
@@ -60,7 +61,7 @@ var numberFormat = (value, decimals) => {
     }
     else
     {
-        let exp = Math.floor(value.log10().toNumber());
+        let exp = Math.floor((value*BigNumber.from(1+1e-5)).log10().toNumber());
         let mts = (value * BigNumber.TEN.pow(-exp)).toString(decimals);
         return `${mts}e${exp}`;
     }
@@ -98,8 +99,8 @@ var init = () => {
 
     // tvar
     {
-        let getDesc = (level) => "\\dot{t}=" + getTdot(level).toString(1);
-        tvar = theory.createUpgrade(1, currency, new ExponentialCost(1e10, Math.log2(1e25)));
+        let getDesc = (level) => "\\dot{t}=" + getTdot(level).toString(2);
+        tvar = theory.createUpgrade(1, currency, new ExponentialCost(1e10, Math.log2(1e20)));
         tvar.getDescription = (_) => Utils.getMath(getDesc(tvar.level));
         tvar.getInfo = (amount) => Utils.getMathTo(getDesc(tvar.level), getDesc(tvar.level + amount));
         tvar.maxLevel = 16;
@@ -145,7 +146,7 @@ var init = () => {
         let getInfo = (level) => "{\\delta}=" + getDelta(level).toString(3);
         delta = theory.createUpgrade(6, currency, new ExponentialCost(1e20, Math.log2(300)));
         delta.getDescription = (_) => Utils.getMath(getDesc(delta.level));
-        delta.getInfo = (amount) => Utils.getMathTo(getDesc(delta.level), getDesc(delta.level + amount));
+        delta.getInfo = (amount) => Utils.getMathTo(getInfo(delta.level), getInfo(delta.level + amount));
     }
 
     // v1
@@ -204,8 +205,8 @@ var init = () => {
 
     ///////////////////////
     //// Milestone Upgrades
-
-    theory.setMilestoneCost(new CustomCost(lvl => tauRate * BigNumber.from([20, 50, 75, 100, 125, 150, 175, 200, 250][lvl])));
+    const milestoneArray = [20, 50, 75, 100, 125, 150, 175, 200, 250, -1]
+    theory.setMilestoneCost(new CustomCost((lvl) => tauRate * BigNumber.from(milestoneArray[Math.min(lvl, 9)])));
 
     {
         velocityTerm = theory.createMilestoneUpgrade(0, 1);
@@ -304,6 +305,7 @@ var tick = (elapsedTime, multiplier) => {
 
     let bonus = theory.publicationMultiplier;
     let vc1 = getC1(c1.level);
+    let vc2 = getC2(c2.level);
     let va1 = getA1(a1.level).pow(getA1exp());
     let va2 = getA2(a2.level);
 
@@ -317,12 +319,11 @@ var tick = (elapsedTime, multiplier) => {
     B = mu0 * I * getDelta(delta.level);
     omega = (getQ() / getM()) * B;
 
-    let tterm = t.pow(BigNumber.from(0.2));
     let xterm = x.pow(getXexp());
     let omegaterm = omega.pow(getOmegaexp());
     let vterm = velocityTerm.level > 0 ? vtot.pow(getVexp()) : BigNumber.ONE;
 
-    rhodot = dt * bonus * C * tterm * vc1 * xterm * omegaterm * vterm;
+    rhodot = dt * bonus * C * vc1 * vc2 * xterm * omegaterm * vterm;
     currency.value += rhodot;
 
     theory.invalidateQuaternaryValues();
@@ -343,7 +344,7 @@ var getPrimaryEquation = () => {
     {
         theory.primaryEquationHeight = 80;
         theory.primaryEquationScale = 1.2;
-        result += `\\dot{\\rho} = Ct^{0.2}{c_1}x^{${getXexp().toNumber()}}\\omega^{${getOmegaexp().toNumber()}}`;
+        result += `\\dot{\\rho} = C{c_1}{c_2}x^{${getXexp().toNumber()}}\\omega^{${getOmegaexp().toNumber()}}`;
         if (velocityTerm.level > 0) result += `v^{${getVexp().toNumber()}}`;
     }
 
@@ -468,7 +469,7 @@ var goToNextStage = () => {
 
 
 var getPublicationMultiplier = (tau) => tau.pow(pubExponent);
-var getPublicationMultiplierFormula = (symbol) => `${symbol}}^{${pubExponent}}`;
+var getPublicationMultiplierFormula = (symbol) => `${symbol}^{${pubExponent}}`;
 var getTau = () => currency.value.pow(tauRate);
 var getCurrencyFromTau = (tau) => [tau.max(BigNumber.ONE).pow(BigNumber.ONE / tauRate), currency.symbol]
 
@@ -489,27 +490,41 @@ var postPublish = () => {
 
 var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
 
+var getInternalState = () => `${x.toNumber()} ${vx.toNumber()} ${vz.toNumber()} ${vtot.toNumber()} ${I.toNumber()} ${t} ${ts}`;
+
+var setInternalState = (state) => {
+    let values = state.split(" ");
+    if (values.length > 0) x = BigNumber.from(values[0]);
+    if (values.length > 1) vx = BigNumber.from(values[1]);
+    if (values.length > 2) vz = BigNumber.from(values[2]);
+    if (values.length > 3) vtot = BigNumber.from(values[3]);
+    if (values.length > 4) I = BigNumber.from(values[4]);
+    if (values.length > 5) t = parseBigNumber(values[5]);
+    if (values.length > 6) ts = parseBigNumber(values[6]);
+  
+    updateC();
+  };
 
 var getDebugMult = (level) => Utils.getStepwisePowerSum(level, 10, 9, 1);
 
 var getTdot = (level) => BigNumber.from(0.2 + level / 20);
 
-var getXexp = () => (BigNumber.from(4));
-var getOmegaexp = () => (BigNumber.from(4.2));
-var getVexp = () => (BigNumber.from(1.5));
-var getA1exp = () => (BigNumber.ONE);
+var getXexp = () => (BigNumber.from(4) + 0.05*xExp.level);
+var getOmegaexp = () => (BigNumber.from(4.2) + 0.05*omegaExp.level);
+var getVexp = () => (BigNumber.from(1.5) + 0.05*omegaExp.level);
+var getA1exp = () => (BigNumber.ONE + a1Exp.level*0.07);
 
 var updateC = () => {
-    let m = BigNumber.from(1e-4);
-    let xinit = BigNumber.from(1e20).pow(getXexp());
-    let omegainit = (BigNumber.from(1e-3) / (q0 * mu0 * i0)).pow(getOmegaexp());
+    let m = BigNumber.from(1);
+    let xinit = BigNumber.from(1e19).pow(getXexp());
+    let omegainit = (defaultmass / (q0 * mu0 * i0)).pow(getOmegaexp());
     let vinit = velocityTerm.level === 1 ? BigNumber.from(1e18).pow(getVexp()) : BigNumber.ONE;
 
     C = m * xinit * omegainit * vinit;
 }
 
 var getQ = () => q0;
-var getM = () => BigNumber.from(1e-3);
+var getM = () => defaultmass;
 
 var getC1 = (level) => Utils.getStepwisePowerSum(level, 2, 7, 0);
 var getC2 = (level) => BigNumber.TWO.pow(level);
