@@ -53,6 +53,20 @@ var achievement1, achievement2;
 var chapter1, chapter2;
 
 
+var numberFormat = (value, decimals) => {
+    if (value > BigNumber.from(0.01) || value == BigNumber.ZERO) 
+    {
+        return value.toString(decimals+1);
+    }
+    else
+    {
+        let exp = Math.floor(value.log10().toNumber());
+        let mts = (value * BigNumber.TEN.pow(-exp)).toString(decimals);
+        return `${mts}e${exp}`;
+    }
+}
+
+
 var resetSimulation = () => {
     ts = BigNumber.ZERO;
     x = BigNumber.ZERO;
@@ -119,7 +133,7 @@ var init = () => {
     // a2
     {
         let getDesc = (level) => "a_2={1.25}^{" + level + "}";
-        let getInfo = (level) => "a_2=" + getA2(level).toString(0);
+        let getInfo = (level) => "a_2=" + getA2(level).toString(3);
         a2 = theory.createUpgrade(5, currency, new ExponentialCost(1e4, Math.log2(70)));
         a2.getDescription = (_) => Utils.getMath(getDesc(a2.level));
         a2.getInfo = (amount) => Utils.getMathTo(getInfo(a2.level), getInfo(a2.level + amount));
@@ -128,7 +142,7 @@ var init = () => {
     // delta
     {
         let getDesc = (level) => "{\\delta}={1.1}^{" + level + "}";
-        let getInfo = (level) => "{\\delta}=" + getDelta(level).toString(0);
+        let getInfo = (level) => "{\\delta}=" + getDelta(level).toString(3);
         delta = theory.createUpgrade(6, currency, new ExponentialCost(1e20, Math.log2(300)));
         delta.getDescription = (_) => Utils.getMath(getDesc(delta.level));
         delta.getInfo = (amount) => Utils.getMathTo(getDesc(delta.level), getDesc(delta.level + amount));
@@ -145,7 +159,7 @@ var init = () => {
     // v2
     {
         let getDesc = (level) => "v_2={1.3}^{" + level + "}";
-        let getInfo = (level) => "v_2=" + getV2(level).toString(0);
+        let getInfo = (level) => "v_2=" + getV2(level).toString(3);
         v2 = theory.createUpgrade(8, currency, new ExponentialCost(1e4, 4.5*Math.log2(10)));
         v2.getDescription = (_) => Utils.getMath(getDesc(v2.level));
         v2.getInfo = (amount) => Utils.getMathTo(getInfo(v2.level), getInfo(v2.level + amount));
@@ -162,7 +176,7 @@ var init = () => {
     // v4
     {
         let getDesc = (level) => "v_4={1.5}^{" + level + "}";
-        let getInfo = (level) => "v_4=" + getV4(level).toString(0);
+        let getInfo = (level) => "v_4=" + getV4(level).toString(3);
         v4 = theory.createUpgrade(10, currency, new ExponentialCost(1e55, 6*Math.log2(10)));
         v4.getDescription = (_) => Utils.getMath(getDesc(v4.level));
         v4.getInfo = (amount) => Utils.getMathTo(getInfo(v4.level), getInfo(v4.level + amount));
@@ -314,21 +328,6 @@ var tick = (elapsedTime, multiplier) => {
     theory.invalidateQuaternaryValues();
 }
 
-
-var paramRepr = (value, decimals) => {
-    if (value > BigNumber.from(0.01) || value == BigNumber.ZERO) 
-    {
-        return value.toString(decimals+1);
-    }
-    else
-    {
-        let exp = Math.floor(value.log10().toNumber());
-        let mts = (value * BigNumber.TEN.pow(-exp)).toString(decimals);
-        return `${mts}e${exp}`;
-    }
-}
-
-
 var getPrimaryEquation = () => {
     let result = ``;
 
@@ -366,7 +365,7 @@ var getSecondaryEquation = () => {
             result += `v_y = [{v_3}{v_4}\\times{10^{-20}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
             result += `v_z = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
         }
-        result += `\\dot{I} = {a_1}\\times{10^{-2}}\\left(10^{15} - \\frac{I}{a_2}\\right)\\\\`;
+        result += `\\dot{I} = \\frac{a_1}{100}\\left(10^{15} - \\frac{I}{a_2}\\right)\\\\`;
     }
     else
     {
@@ -376,7 +375,7 @@ var getSecondaryEquation = () => {
         {
             result += `v = \\sqrt{{v_x}^2+{v_y}^2+{v_z}^2}\\\\`;
         }
-        result += `C = ${paramRepr(C, 2)}`;
+        result += `C = ${numberFormat(C, 2)}`;
     }
 
     return result;
@@ -387,7 +386,7 @@ var getTertiaryEquation = () => {
 
     if (stage == 0)
     {
-        result += `m=${paramRepr(getM(),2)}`;
+        result += `m=${numberFormat(getM(),2)}`;
         if (deltaVariable.level == 0)
         {
             result += ` ,\\,{\\delta}=1`;
@@ -430,18 +429,18 @@ var getQuaternaryEntries = () => {
     if (stage == 0)
     {
         quaternaryEntries[1].value = ts.toString(2);
-        quaternaryEntries[2].value = paramRepr(x, 2);
-        quaternaryEntries[3].value = paramRepr(vx, 2);
-        quaternaryEntries[4].value = paramRepr(B, 2);
-        quaternaryEntries[5].value = paramRepr(I, 2);
+        quaternaryEntries[2].value = numberFormat(x, 2);
+        quaternaryEntries[3].value = numberFormat(vx, 2);
+        quaternaryEntries[4].value = numberFormat(B, 2);
+        quaternaryEntries[5].value = numberFormat(I, 2);
     }
     else
     {
         quaternaryEntries[1].value = t.toString(2);
         quaternaryEntries[2].value = rhodot.toString(2);
-        quaternaryEntries[3].value = paramRepr(x, 2);
-        quaternaryEntries[4].value = paramRepr(omega, 2);
-        if (velocityTerm.level == 1) {quaternaryEntries[5].value = paramRepr(vtot, 3);}
+        quaternaryEntries[3].value = numberFormat(x, 2);
+        quaternaryEntries[4].value = numberFormat(omega, 2);
+        if (velocityTerm.level == 1) {quaternaryEntries[5].value = numberFormat(vtot, 3);}
     }
 
     return quaternaryEntries;
