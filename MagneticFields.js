@@ -111,16 +111,16 @@ var init = () => {
     // a1
     {
         let getDesc = (level) => "a_1=" + getA1(level).toString(0);
-        a1 = theory.createUpgrade(4, currency, new ExponentialCost(15, Math.log2(2)));
+        a1 = theory.createUpgrade(4, currency, new ExponentialCost(100, Math.log2(20)));
         a1.getDescription = (_) => Utils.getMath(getDesc(a1.level));
         a1.getInfo = (amount) => Utils.getMathTo(getDesc(a1.level), getDesc(a1.level + amount));
     }
 
     // a2
     {
-        let getDesc = (level) => "a_2=2^{" + level + "}";
+        let getDesc = (level) => "a_2={1.25}^{" + level + "}";
         let getInfo = (level) => "a_2=" + getA2(level).toString(0);
-        a2 = theory.createUpgrade(5, currency, new ExponentialCost(1e5, Math.log2(1e3)));
+        a2 = theory.createUpgrade(5, currency, new ExponentialCost(1e4, Math.log2(70)));
         a2.getDescription = (_) => Utils.getMath(getDesc(a2.level));
         a2.getInfo = (amount) => Utils.getMathTo(getInfo(a2.level), getInfo(a2.level + amount));
     }
@@ -297,9 +297,9 @@ var tick = (elapsedTime, multiplier) => {
     ts += dt * getTdot(tvar.level);
     x += dt * getTdot(tvar.level) * vx;
     
-    let dI = va1 * (i0 - I/va2);
+    let dI = va1 * BigNumber.from(1e-2) * (i0 - I/va2);
     I += dI.min(BigNumber.ZERO);
-    I = I.max(va2*i0);
+    I = I.min(va2*i0);
     B = mu0 * I * getDelta(delta.level);
     omega = (getQ() / getM()) * B;
 
@@ -366,7 +366,7 @@ var getSecondaryEquation = () => {
             result += `v_y = [{v_3}{v_4}\\times{10^{-20}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
             result += `v_z = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
         }
-        result += `\\dot{I} = {a_1}\\left(10^{15} - \\frac{I}{a_2}\\right)\\\\`;
+        result += `\\dot{I} = {a_1}\\times{10^{-2}}\\left(10^{15} - \\frac{I}{a_2}\\right)\\\\`;
     }
     else
     {
@@ -501,7 +501,7 @@ var getVexp = () => (BigNumber.from(1.5));
 var getA1exp = () => (BigNumber.ONE);
 
 var updateC = () => {
-    let m = BigNumber.from(3e-5);
+    let m = BigNumber.from(1e-4);
     let xinit = BigNumber.from(1e20).pow(getXexp());
     let omegainit = (BigNumber.from(1e-3) / (q0 * mu0 * i0)).pow(getOmegaexp());
     let vinit = velocityTerm.level === 1 ? BigNumber.from(1e18).pow(getVexp()) : BigNumber.ONE;
@@ -514,8 +514,8 @@ var getM = () => BigNumber.from(1e-3);
 
 var getC1 = (level) => Utils.getStepwisePowerSum(level, 2, 7, 0);
 var getC2 = (level) => BigNumber.TWO.pow(level);
-var getA1 = (level) => Utils.getStepwisePowerSum(level, 2, 10, 1);
-var getA2 = (level) => BigNumber.TWO.pow(level);
+var getA1 = (level) => Utils.getStepwisePowerSum(level, 2, 5, 1);
+var getA2 = (level) => BigNumber.from(1.25).pow(level);
 var getDelta = (level) => deltaVariable.level > 0 ? BigNumber.from(1.1).pow(level) : BigNumber.ONE;
 var getV1 = (level) => Utils.getStepwisePowerSum(level, 2, 10, 1);
 var getV2 = (level) => BigNumber.from(1.3).pow(level);
