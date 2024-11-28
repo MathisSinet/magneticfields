@@ -500,7 +500,7 @@ var updateC = () => {
     let m = BigNumber.from(3e-5);
     let xinit = BigNumber.from(1e20).pow(getXexp());
     let omegainit = (BigNumber.from(1e-3) / (q0 * mu0 * i0)).pow(getOmegaexp());
-    let vinit = BigNumber.from(1e18).pow(getVexp());
+    let vinit = velocityTerm.level === 1 ? BigNumber.from(1e18).pow(getVexp()) : BigNumber.ONE;
 
     C = m * xinit * omegainit * vinit;
 }
