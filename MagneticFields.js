@@ -192,10 +192,11 @@ var init = () => {
     if (debugFlag)
     {
         debugMultUpgrade = theory.createPermanentUpgrade(3, currency, new ConstantCost(BigNumber.from(0.01)));
-        debugMultUpgrade.getDescription = (_) => "Debug dt multiplier : " + getDebugMult(debugMultUpgrade.level).toString(0);
+        debugMultUpgrade.getDescription = (_) => "Testing : dt multiplier : " + getDebugMult(debugMultUpgrade.level).toString(0);
+        debugMultUpgrade.maxLevel = 100;
         
         debugMultResetUpgrade = theory.createPermanentUpgrade(4, currency, new FreeCost);
-        debugMultResetUpgrade.getDescription = (_) => "Reset debug dt multiplier";
+        debugMultResetUpgrade.getDescription = (_) => "Reset the testing dt multiplier";
         debugMultResetUpgrade.boughtOrRefunded = (_) =>
         {
             debugMultUpgrade.level = 0;
@@ -267,8 +268,8 @@ var init = () => {
 
     {
         a1Exp = theory.createMilestoneUpgrade(5, 1);
-        a1Exp.description = Localization.getUpgradeIncCustomExpDesc("a_1", "0.05");
-        a1Exp.info = Localization.getUpgradeIncCustomExpInfo("a_1", "0.05");
+        a1Exp.description = Localization.getUpgradeIncCustomExpDesc("a_1", "0.07");
+        a1Exp.info = Localization.getUpgradeIncCustomExpInfo("a_1", "0.07");
         a1Exp.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
     
@@ -363,7 +364,7 @@ var getSecondaryEquation = () => {
         {
             theory.secondaryEquationHeight = 100;
             theory.secondaryEquationScale = 0.9;
-            result += `v_y = [{v_3}{v_4}\\times{10^{-20}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
+            result += `v_y = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
             result += `v_z = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
         }
         result += `\\dot{I} = \\frac{a_1}{100}\\left(10^{15} - \\frac{I}{a_2}\\right)\\\\`;
