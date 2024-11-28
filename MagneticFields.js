@@ -66,7 +66,6 @@ var resetSimulation = () => {
 var init = () => {
     currency = theory.createCurrency();
     quaternaryEntries = [];
-    updateC();
 
     // Reset simulation
     {
@@ -200,6 +199,7 @@ var init = () => {
         velocityTerm.info = Localization.getUpgradeAddTermInfo("v");
         velocityTerm.canBeRefunded = (_) => (vExp.level == 0);
         velocityTerm.boughtOrRefunded = (_) => {
+            updateC();
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
             theory.invalidateQuaternaryValues();
@@ -222,6 +222,7 @@ var init = () => {
         xExp.description = Localization.getUpgradeIncCustomExpDesc("x", "0.05");
         xExp.info = Localization.getUpgradeIncCustomExpInfo("x", "0.05");
         xExp.boughtOrRefunded = (_) => {
+            updateC();
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
         }
@@ -232,6 +233,7 @@ var init = () => {
         omegaExp.description = Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.05");
         omegaExp.info = Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.05");
         omegaExp.boughtOrRefunded = (_) => {
+            updateC();
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
         }
@@ -242,6 +244,7 @@ var init = () => {
         vExp.description = Localization.getUpgradeIncCustomExpDesc("v", "0.05");
         vExp.info = Localization.getUpgradeIncCustomExpInfo("v", "0.05");
         vExp.boughtOrRefunded = (_) => {
+            updateC();
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
         }
@@ -266,6 +269,7 @@ var init = () => {
     chapter2 = theory.createStoryChapter(1, "Magnetic Fields Chapter 2", "This term will be useful for you. (placeholder)", () => velocityTerm.level > 0);
 
     updateAvailability();
+    updateC();
 }
 
 var updateAvailability = () => {
