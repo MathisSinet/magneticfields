@@ -6,9 +6,9 @@ import { Utils } from "../api/Utils";
 
 var id = "magnetic_fields";
 var name = "Magnetic Fields";
-var description = "A Custom Theory about magnetic fields.\nVersion 0.01";
+var description = "A Custom Theory about magnetic fields.\nVersion 0.1.0";
 var authors = "Mathis S.";
-var version = 1;
+var version = 0.1;
 
 const tauRate = 1;
 const pubExponent = 0.17;
@@ -510,7 +510,7 @@ var getDebugMult = (level) => Utils.getStepwisePowerSum(level, 10, 9, 1);
 
 var getTdot = (level) => BigNumber.from(0.2 + level / 20);
 
-var getXexp = () => (BigNumber.from(4) + 0.05*xExp.level);
+var getXexp = () => (BigNumber.from(3.8) + 0.05*xExp.level);
 var getOmegaexp = () => (BigNumber.from(4.2) + 0.05*omegaExp.level);
 var getVexp = () => (BigNumber.from(1.5) + 0.05*omegaExp.level);
 var getA1exp = () => (BigNumber.ONE + a1Exp.level*0.07);
