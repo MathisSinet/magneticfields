@@ -6,9 +6,9 @@ import { Utils } from "../api/Utils";
 
 var id = "magnetic_fields";
 var name = "Magnetic Fields";
-var description = "A Custom Theory about magnetic fields.\nVersion 0.1.0";
+var description = "A Custom Theory about magnetic fields.\nVersion 0.2.0";
 var authors = "Mathis S.";
-var version = 0.1;
+var version = 0.2;
 
 const tauRate = 1;
 const pubExponent = 0.17;
@@ -17,7 +17,7 @@ const mu0 = BigNumber.FOUR * BigNumber.PI * BigNumber.from(1e-7);
 const q0 = BigNumber.from(1.602e-19);
 
 const i0 = BigNumber.from(1e-15);
-const defaultmass = BigNumber.from(1e-4)
+const defaultmass = BigNumber.from(1e-3)
 
 // Debug tools
 var debugFlag = 1;
@@ -53,11 +53,10 @@ var c1, c2, v1, v2, v3, v4, a1, a2, delta;
 var achievement1, achievement2;
 var chapter1, chapter2;
 
-
 var numberFormat = (value, decimals) => {
-    if (value > BigNumber.from(0.01) || value == BigNumber.ZERO) 
+    if (value > BigNumber.from(0.1) || value == BigNumber.ZERO) 
     {
-        return value.toString(decimals+1);
+        return value.toString(decimals);
     }
     else
     {
@@ -82,29 +81,8 @@ var init = () => {
     currency = theory.createCurrency();
     quaternaryEntries = [];
 
-    // Reset simulation
-    {
-        resetUpgrade = theory.createSingularUpgrade(0, currency, new FreeCost);
-        resetUpgrade.getDescription = (_) => "Reset particle";
-        resetUpgrade.getInfo = (_) => "Reset the particle to its initial position";
-        resetUpgrade.boughtOrRefunded = (_) =>
-        {
-            resetUpgrade.level = 0;
-            resetSimulation();
-        }
-    }
-
     ///////////////////
     // Regular Upgrades
-
-    // tvar
-    {
-        let getDesc = (level) => "\\dot{t}=" + getTdot(level).toString(2);
-        tvar = theory.createUpgrade(1, currency, new ExponentialCost(1e10, Math.log2(1e20)));
-        tvar.getDescription = (_) => Utils.getMath(getDesc(tvar.level));
-        tvar.getInfo = (amount) => Utils.getMathTo(getDesc(tvar.level), getDesc(tvar.level + amount));
-        tvar.maxLevel = 16;
-    }
 
     // c1
     {
@@ -118,7 +96,7 @@ var init = () => {
     {
         let getDesc = (level) => "c_2=2^{" + level + "}";
         let getInfo = (level) => "c_2=" + getC2(level).toString(0);
-        c2 = theory.createUpgrade(3, currency, new ExponentialCost(1e4, Math.log2(100)));
+        c2 = theory.createUpgrade(3, currency, new ExponentialCost(1000, Math.log2(100)));
         c2.getDescription = (_) => Utils.getMath(getDesc(c2.level));
         c2.getInfo = (amount) => Utils.getMathTo(getInfo(c2.level), getInfo(c2.level + amount));
     }
@@ -126,7 +104,7 @@ var init = () => {
     // a1
     {
         let getDesc = (level) => "a_1=" + getA1(level).toString(0);
-        a1 = theory.createUpgrade(4, currency, new ExponentialCost(100, Math.log2(20)));
+        a1 = theory.createUpgrade(4, currency, new ExponentialCost(1000, Math.log2(25)));
         a1.getDescription = (_) => Utils.getMath(getDesc(a1.level));
         a1.getInfo = (amount) => Utils.getMathTo(getDesc(a1.level), getDesc(a1.level + amount));
     }
@@ -135,7 +113,7 @@ var init = () => {
     {
         let getDesc = (level) => "a_2={1.25}^{" + level + "}";
         let getInfo = (level) => "a_2=" + getA2(level).toString(3);
-        a2 = theory.createUpgrade(5, currency, new ExponentialCost(1e4, Math.log2(70)));
+        a2 = theory.createUpgrade(5, currency, new ExponentialCost(1e4, Math.log2(55)));
         a2.getDescription = (_) => Utils.getMath(getDesc(a2.level));
         a2.getInfo = (amount) => Utils.getMathTo(getInfo(a2.level), getInfo(a2.level + amount));
     }
@@ -144,7 +122,7 @@ var init = () => {
     {
         let getDesc = (level) => "{\\delta}={1.1}^{" + level + "}";
         let getInfo = (level) => "{\\delta}=" + getDelta(level).toString(3);
-        delta = theory.createUpgrade(6, currency, new ExponentialCost(1e20, Math.log2(300)));
+        delta = theory.createUpgrade(6, currency, new ExponentialCost(1e50, Math.log2(300)));
         delta.getDescription = (_) => Utils.getMath(getDesc(delta.level));
         delta.getInfo = (amount) => Utils.getMathTo(getInfo(delta.level), getInfo(delta.level + amount));
     }
@@ -152,7 +130,7 @@ var init = () => {
     // v1
     {
         let getDesc = (level) => "v_1=" + getV1(level).toString(0);
-        v1 = theory.createUpgrade(7, currency, new ExponentialCost(50, Math.log2(80)));
+        v1 = theory.createUpgrade(7, currency, new ExponentialCost(80, Math.log2(80)));
         v1.getDescription = (_) => Utils.getMath(getDesc(v1.level));
         v1.getInfo = (amount) => Utils.getMathTo(getDesc(v1.level), getDesc(v1.level + amount));
     }
@@ -185,15 +163,15 @@ var init = () => {
 
     /////////////////////
     // Permanent Upgrades
-    theory.createPublicationUpgrade(0, currency, 1e7);
+    theory.createPublicationUpgrade(0, currency, 1e8);
     theory.createBuyAllUpgrade(1, currency, 1e10);
-    theory.createAutoBuyerUpgrade(2, currency, 1e15);
+    theory.createAutoBuyerUpgrade(2, currency, 1e13);
 
     if (debugFlag)
     {
         debugMultUpgrade = theory.createPermanentUpgrade(3, currency, new ConstantCost(BigNumber.from(0.01)));
-        debugMultUpgrade.getDescription = (_) => "Testing : dt multiplier : " + getDebugMult(debugMultUpgrade.level).toString(0);
-        debugMultUpgrade.maxLevel = 100;
+        debugMultUpgrade.getDescription = (_) => "Testing> dt multiplier: " + getDebugMult(debugMultUpgrade.level).toString(0);
+        debugMultUpgrade.maxLevel = 90;
         
         debugMultResetUpgrade = theory.createPermanentUpgrade(4, currency, new FreeCost);
         debugMultResetUpgrade.getDescription = (_) => "Reset the testing dt multiplier";
@@ -206,14 +184,14 @@ var init = () => {
 
     ///////////////////////
     //// Milestone Upgrades
-    const milestoneArray = [20, 50, 75, 100, 125, 150, 175, 200, 250, -1]
+    const milestoneArray = [20, 50, 175, 225, 275, 325, 425, 475, 525, -1]
     theory.setMilestoneCost(new CustomCost((lvl) => tauRate * BigNumber.from(milestoneArray[Math.min(lvl, 9)])));
 
     {
         velocityTerm = theory.createMilestoneUpgrade(0, 1);
         velocityTerm.description = Localization.getUpgradeAddTermDesc("v");
         velocityTerm.info = Localization.getUpgradeAddTermInfo("v");
-        velocityTerm.canBeRefunded = (_) => (vExp.level == 0);
+        velocityTerm.canBeRefunded = (_) => (deltaVariable.level === 0);
         velocityTerm.boughtOrRefunded = (_) => {
             updateC();
             theory.invalidatePrimaryEquation();
@@ -227,6 +205,7 @@ var init = () => {
         deltaVariable = theory.createMilestoneUpgrade(1, 1);
         deltaVariable.description = Localization.getUpgradeAddTermDesc("\\delta");
         deltaVariable.info = Localization.getUpgradeAddTermInfo("\\delta");
+        deltaVariable.canBeRefunded = (_) => (xExp.level === 0 && omegaExp.level === 0);
         deltaVariable.boughtOrRefunded = (_) => {
             theory.invalidateTertiaryEquation();
             updateAvailability();
@@ -235,30 +214,34 @@ var init = () => {
 
     {
         xExp = theory.createMilestoneUpgrade(2, 2);
-        xExp.description = Localization.getUpgradeIncCustomExpDesc("x", "0.05");
-        xExp.info = Localization.getUpgradeIncCustomExpInfo("x", "0.05");
+        xExp.description = Localization.getUpgradeIncCustomExpDesc("x", "0.24");
+        xExp.info = Localization.getUpgradeIncCustomExpInfo("x", "0.24");
+        xExp.canBeRefunded = (_) => (vExp.level === 0 && a1Exp.level === 0);
         xExp.boughtOrRefunded = (_) => {
             updateC();
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
+            updateAvailability();
         }
     }
 
     {
         omegaExp = theory.createMilestoneUpgrade(3, 2);
-        omegaExp.description = Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.05");
-        omegaExp.info = Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.05");
+        omegaExp.description = Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.22");
+        omegaExp.info = Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.22");
+        omegaExp.canBeRefunded = (_) => (vExp.level === 0 && a1Exp.level === 0);
         omegaExp.boughtOrRefunded = (_) => {
             updateC();
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
+            updateAvailability();
         }
     }
 
     {
         vExp = theory.createMilestoneUpgrade(4, 2);
-        vExp.description = Localization.getUpgradeIncCustomExpDesc("v", "0.05");
-        vExp.info = Localization.getUpgradeIncCustomExpInfo("v", "0.05");
+        vExp.description = Localization.getUpgradeIncCustomExpDesc("v", "0.39");
+        vExp.info = Localization.getUpgradeIncCustomExpInfo("v", "0.39");
         vExp.boughtOrRefunded = (_) => {
             updateC();
             theory.invalidatePrimaryEquation();
@@ -268,8 +251,8 @@ var init = () => {
 
     {
         a1Exp = theory.createMilestoneUpgrade(5, 1);
-        a1Exp.description = Localization.getUpgradeIncCustomExpDesc("a_1", "0.07");
-        a1Exp.info = Localization.getUpgradeIncCustomExpInfo("a_1", "0.07");
+        a1Exp.description = Localization.getUpgradeIncCustomExpDesc("a_1", "0.01");
+        a1Exp.info = Localization.getUpgradeIncCustomExpInfo("a_1", "0.01");
         a1Exp.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
     
@@ -289,7 +272,11 @@ var init = () => {
 }
 
 var updateAvailability = () => {
-    vExp.isAvailable = velocityTerm.level > 0;
+    deltaVariable.isAvailable = velocityTerm.level > 0;
+    xExp.isAvailable = deltaVariable.level > 0;
+    omegaExp.isAvailable = deltaVariable.level > 0;
+    vExp.isAvailable = (xExp.level + omegaExp.level === 4);
+    a1Exp.isAvailable = (xExp.level + omegaExp.level === 4);
 
     delta.isAvailable = deltaVariable.level > 0;
     v3.isAvailable = velocityTerm.level > 0;
@@ -310,9 +297,9 @@ var tick = (elapsedTime, multiplier) => {
     let va1 = getA1(a1.level).pow(getA1exp());
     let va2 = getA2(a2.level);
 
-    t += dt * getTdot(tvar.level);
-    ts += dt * getTdot(tvar.level);
-    x += dt * getTdot(tvar.level) * vx;
+    t += dt;
+    ts += dt;
+    x += dt * vx;
     
     let dI = va1 * BigNumber.from(1e-2) * (i0 - I/va2);
     I += dI.max(BigNumber.ZERO);
@@ -345,8 +332,8 @@ var getPrimaryEquation = () => {
     {
         theory.primaryEquationHeight = 80;
         theory.primaryEquationScale = 1.2;
-        result += `\\dot{\\rho} = C{c_1}{c_2}x^{${getXexp().toNumber()}}\\omega^{${getOmegaexp().toNumber()}}`;
-        if (velocityTerm.level > 0) result += `v^{${getVexp().toNumber()}}`;
+        result += `\\dot{\\rho} = C{c_1}{c_2}x^{${numberFormat(getXexp(),2)}}\\omega^{${numberFormat(getOmegaexp(),2)}}`;
+        if (velocityTerm.level > 0) result += `v^{${numberFormat(getVexp(),2)}}`;
     }
 
     return result;
@@ -367,7 +354,7 @@ var getSecondaryEquation = () => {
             result += `v_y = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
             result += `v_z = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
         }
-        result += `\\dot{I} = \\frac{a_1}{100}\\left(10^{15} - \\frac{I}{a_2}\\right)\\\\`;
+        result += `\\dot{I} = \\frac{a_1}{100}\\left(10^{-15} - \\frac{I}{a_2}\\right)\\\\`;
     }
     else
     {
@@ -439,7 +426,7 @@ var getQuaternaryEntries = () => {
     else
     {
         quaternaryEntries[1].value = t.toString(2);
-        quaternaryEntries[2].value = rhodot.toString(2);
+        quaternaryEntries[2].value = numberFormat(rhodot, 2);
         quaternaryEntries[3].value = numberFormat(x, 2);
         quaternaryEntries[4].value = numberFormat(omega, 2);
         if (velocityTerm.level == 1) {quaternaryEntries[5].value = numberFormat(vtot, 3);}
@@ -468,6 +455,14 @@ var goToNextStage = () => {
   theory.invalidateQuaternaryValues();
 };
 
+var canResetStage = () => true;
+
+const resetMessage1 = "Resets x but updates vx with the latest values of v1 and v2"
+const resetMessage2 = "Resets x but updates vx, vy and vz with the latest values of v1, v2, v3 and v4"
+
+var getResetStageMessage = () => velocityTerm.level > 0 ? resetMessage2 : resetMessage1
+
+var resetStage = () => resetSimulation();
 
 var getPublicationMultiplier = (tau) => tau.pow(pubExponent);
 var getPublicationMultiplierFormula = (symbol) => `${symbol}^{${pubExponent}}`;
@@ -484,6 +479,8 @@ var postPublish = () => {
     I = BigNumber.ZERO;
     omega = BigNumber.ZERO;
     B = BigNumber.ZERO;
+
+    rhodot = BigNumber.ZERO;
 
     theory.invalidateQuaternaryValues();
     resetSimulation();
@@ -508,20 +505,19 @@ var setInternalState = (state) => {
 
 var getDebugMult = (level) => Utils.getStepwisePowerSum(level, 10, 9, 1);
 
-var getTdot = (level) => BigNumber.from(0.2 + level / 20);
-
-var getXexp = () => (BigNumber.from(3.8) + 0.05*xExp.level);
-var getOmegaexp = () => (BigNumber.from(4.2) + 0.05*omegaExp.level);
-var getVexp = () => (BigNumber.from(1.5) + 0.05*omegaExp.level);
-var getA1exp = () => (BigNumber.ONE + a1Exp.level*0.07);
+var getXexp = () => (BigNumber.from(3.2 + 0.24*xExp.level));
+var getOmegaexp = () => (BigNumber.from(4.1 + 0.22*omegaExp.level));
+var getVexp = () => (BigNumber.from(1.3 + 0.39*vExp.level));
+var getA1exp = () => (BigNumber.ONE + a1Exp.level*0.01);
 
 var updateC = () => {
-    let m = BigNumber.from(1);
-    let xinit = BigNumber.from(1e19).pow(getXexp());
-    let omegainit = (defaultmass / (q0 * mu0 * i0)).pow(getOmegaexp());
-    let vinit = velocityTerm.level === 1 ? BigNumber.from(1e18).pow(getVexp()) : BigNumber.ONE;
+    let k = BigNumber.from(4.49e19);
+    let xinit = BigNumber.from(1e15).pow(getXexp());
+    let omegainit = (defaultmass / (q0 * mu0 * i0 * 1000)).pow(getOmegaexp());
+    let vinit = velocityTerm.level === 1 ? BigNumber.from(3e19).pow(BigNumber.from(1.3)) : BigNumber.ONE;
+    let vscale = velocityTerm.level === 1 ? BigNumber.from(1e6).pow(getVexp() - BigNumber.from(1.3)) : BigNumber.ONE;
 
-    C = m * xinit * omegainit * vinit;
+    C = k * xinit * omegainit * vinit * vscale;
 }
 
 var getQ = () => q0;
