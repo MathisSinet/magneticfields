@@ -43,11 +43,11 @@ var omega = BigNumber.ZERO;
 var B = BigNumber.ZERO;
 
 var t = BigNumber.ZERO;
-var t_dot = BigNumber.ZERO;
+//var t_dot = BigNumber.ZERO;
 var ts = BigNumber.ZERO;
 var C = BigNumber.ZERO;
 
-var resetUpgrade;
+//var resetUpgrade;
 var c1, c2, v1, v2, v3, v4, a1, a2, delta;
 
 var achievement1, achievement2;
@@ -381,7 +381,7 @@ var getTertiaryEquation = () => {
             result += ` ,\\,{\\delta}=1`;
         }
         result += `\\\\`;
-        result += `\\mu_0=4\\pi\\times{10}^{-7}`;
+        result += `q=1.602\\times{10}^{-19},\\,\\mu_0=4\\pi\\times{10}^{-7}`;
     }
     else
     {
