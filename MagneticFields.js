@@ -6,8 +6,15 @@ import { Utils } from "../api/Utils";
 
 var id = "magnetic_fields";
 var name = "Magnetic Fields";
-var description = "A Custom Theory about magnetic fields.\nVersion 0.2.0";
-var authors = "Mathis S.";
+var description = 
+"A Custom Theory to explore the basic concepts of Magnetic Fields.\n"+
+"Discover the equations that describe the movement of a charged particle on the axis of an infinite solenoid.\n"+
+"Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
+"Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
+"Have fun!\n"+
+"Version 0.2.1"
+var authors = "Mathis S.\n" +
+"Thanks to the amazing Exponential Idle community for their support and feedback on this theory!";
 var version = 0.2;
 
 const tauRate = 1;
