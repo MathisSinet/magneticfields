@@ -8,14 +8,14 @@ var id = "magnetic_fields";
 var name = "Magnetic Fields";
 var description = 
 "A Custom Theory to explore the basic concepts of Magnetic Fields.\n"+
-"Discover the equations that describe the movement of a charged particle on the axis of an infinite solenoid.\n"+
+"Discover the equations that describe the movement of a charged particle inside a solenoid of infinite length.\n"+
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.2.1"
+"Version 0.3"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!";
-var version = 0.2;
+var version = 0.3;
 
 const tauRate = 1;
 const pubExponent = 0.17;
@@ -25,12 +25,6 @@ const q0 = BigNumber.from(1.602e-19);
 
 const i0 = BigNumber.from(1e-15);
 const defaultmass = BigNumber.from(1e-3)
-
-// Debug tools
-var debugFlag = 1;
-var debugMultUpgrade;
-var debugMultResetUpgrade;
-
 
 var currency;
 var quaternaryEntries;
@@ -57,19 +51,37 @@ var C = BigNumber.ZERO;
 //var resetUpgrade;
 var c1, c2, v1, v2, v3, v4, a1, a2, delta;
 
-var achievement1, achievement2;
-var chapter1, chapter2;
+var chapter1, chapter2, chapter3, chapter4, chapter5, chapter6, chapter7;
+
+let endtau = BigNumber.from("1e600")
 
 var numberFormat = (value, decimals) => {
-    if (value > BigNumber.from(0.1) || value == BigNumber.ZERO) 
+    if (value >= BigNumber.ZERO)
     {
-        return value.toString(decimals);
+        if (value > BigNumber.from(0.1) || value == BigNumber.ZERO) 
+        {
+            return value.toString(decimals);
+        }
+        else
+        {
+            let exp = Math.floor((value*BigNumber.from(1+1e-5)).log10().toNumber());
+            let mts = (value * BigNumber.TEN.pow(-exp)).toString(decimals);
+            return `${mts}e${exp}`;
+        }
     }
     else
     {
-        let exp = Math.floor((value*BigNumber.from(1+1e-5)).log10().toNumber());
-        let mts = (value * BigNumber.TEN.pow(-exp)).toString(decimals);
-        return `${mts}e${exp}`;
+        value = -value;
+        if (value > BigNumber.from(0.1) || value == BigNumber.ZERO) 
+        {
+            return (-value).toString(decimals);
+        }
+        else
+        {
+            let exp = Math.floor((value*BigNumber.from(1+1e-5)).log10().toNumber());
+            let mts = (value * BigNumber.TEN.pow(-exp)).toString(decimals);
+            return `-${mts}e${exp}`;
+        }
     }
 }
 
@@ -174,21 +186,6 @@ var init = () => {
     theory.createBuyAllUpgrade(1, currency, 1e10);
     theory.createAutoBuyerUpgrade(2, currency, 1e13);
 
-    if (debugFlag)
-    {
-        debugMultUpgrade = theory.createPermanentUpgrade(3, currency, new ConstantCost(BigNumber.from(0.01)));
-        debugMultUpgrade.getDescription = (_) => "Testing> dt multiplier: " + getDebugMult(debugMultUpgrade.level).toString(0);
-        debugMultUpgrade.maxLevel = 90;
-        
-        debugMultResetUpgrade = theory.createPermanentUpgrade(4, currency, new FreeCost);
-        debugMultResetUpgrade.getDescription = (_) => "Reset the testing dt multiplier";
-        debugMultResetUpgrade.boughtOrRefunded = (_) =>
-        {
-            debugMultUpgrade.level = 0;
-            debugMultResetUpgrade.level = 0;
-        }
-    }
-
     ///////////////////////
     //// Milestone Upgrades
     const milestoneArray = [20, 50, 175, 225, 275, 325, 425, 475, 525, -1]
@@ -263,16 +260,63 @@ var init = () => {
         a1Exp.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
     
-    
-    /////////////////
-    //// Achievements
-    //achievement1 = theory.createAchievement(0, "Achievement 1", "Description 1", () => v1.level > 1);
-    //achievement2 = theory.createSecretAchievement(1, "Achievement 2", "Description 2", "Maybe you should buy two levels of v2?", () => v2.level > 1);
-
     ///////////////////
     //// Story chapters
-    chapter1 = theory.createStoryChapter(0, "Magnetic Fields Chapter 1", "Welcome to Magnetic Fields! (placeholder)", () => c1.level > 0);
-    chapter2 = theory.createStoryChapter(1, "Magnetic Fields Chapter 2", "This term will be useful for you. (placeholder)", () => velocityTerm.level > 0);
+
+    let story1 = "After years of exploring multiple fields of mathematics to find new concepts for growing τ, you decide to head to the physics department of your university.\n"
+    story1 += "You meet a student in electromagnetism, huge fan of your work, who hands you a small sheet of equations.\n"
+    story1 += "The title: 'Movement of a charged particle inside an infinite charged solenoid'\n"
+    story1 += "You're unsure if it will help your project, but you choose to give it a try..."
+    chapter1 = theory.createStoryChapter(0, "Exploring physics", story1, () => c1.level > 0);
+
+    let story2 = "You're pretty satisfied with the results so far.\n"
+    story2 += "Reseting the particle's position enough times helped with your progress.\n"
+    story2 += "However, you feel like there is something missing.\n"
+    story2 += "Maybe including the velocity of the particle in the equation will help..."
+    chapter2 = theory.createStoryChapter(1, "Speeding up", story2, () => velocityTerm.level > 0);
+
+    let story3 = "You keep engaging with students to learn more about magnetic fields.\n"
+    story3 += "One of them tells you that the magnetic field generated by the solenoid gets stronger as the density of turns increases.\n"
+    story3 += "You notice the term δ in the equations.\n"
+    story3 += "You learn it is meant to represent the density of turns of the solenoid.\n"
+    story3 += "Why not turing it into an upgrade?"
+    chapter3 = theory.createStoryChapter(2, "The density of progress", story3, () => deltaVariable.level > 0);
+
+    let story4 = "The theory keeps working its way forward, however it is slowing down quite a bit.\n"
+    story4 += "You start wondering: Was the physics student's project to grow τ flawed?\n"
+    story4 += "Can the theory really reach higher limits?\n"
+    story4 += "You start looking closer at the exponents of x and ω.\n"
+    story4 += "Right! Increasing them would be a nice idea to progress further.\n"
+    story4 += "It's time for the old exponent trick.\n"
+    chapter4 = theory.createStoryChapter(3, "An old trick", story4, () => xExp.level + omegaExp.level > 0);
+
+    let story5 = "Since the beginning, you were confident about this project.\n"
+    story5 += "Exploring new concepts with electromagnetism was really fun, it feels refreshing after so much pure maths.\n"
+    story5 += "However, is it really worth it for your τ project?\n"
+    story5 += "The theory became so slow the last few days!\n"
+    story5 += "Big numbers aren't suited for physics, it seems.\n"
+    story5 += "As you reconsider your choice, you realize that you aren't out of options.\n"
+    story5 += "More variables have exponents to be tinkered with...\n"
+    chapter5 = theory.createStoryChapter(4, "Reconsideration", story5, () => vExp.level + a1Exp.level > 0);
+
+    let story6 = "The magnetic fields project paid off\n"
+    story6 += "You finally did it, you reached 1e600τ!\n"
+    story6 += "You decide to organise a small party with the physics students that help you throuhout your journey.\n"
+    story6 += "That was a long investment, but you feel like it was worth it.\n"
+    story6 += "You miss pure mathematics but, at the same time, you want to explore more physics domains.\n"
+    story6 += "One thing you're certain, is that this project marked a big step in your life.\n"
+    chapter6 = theory.createStoryChapter(5, "An accomplishment", story6, () => theory.tau > endtau);
+
+    let story7 = "Weeks, if not months, have passed since you finished your magnetic fields main project.\n"
+    story7 += "However, you couldn't help but pursuing your work on the theory as a side project.\n"
+    story7 += "Physics students told you they have a little surprise for you once you reach v=3e8\n"
+    story7 += "This value was familiar to you: the speed of light.\n"
+    story7 += "One famous physician proved that nothing can be faster then this speed.\n"
+    story7 += "But on this day, your particle finally reached it.\n"
+    story7 += "Your charged particle is now faster than the speed of light. How is that possible?\n"
+    story7 += "...........\n"
+    story7 += "(Not finished)\n"
+    //chapter7 = theory.createStoryChapter(6, "Albert Einstein", story7, () => vtot > 3e8);
 
     updateAvailability();
     updateC();
@@ -296,7 +340,6 @@ var tick = (elapsedTime, multiplier) => {
     if (c1.level == 0) return;
 
     let dt = BigNumber.from(elapsedTime * multiplier);
-    if (debugFlag) dt *= getDebugMult(debugMultUpgrade.level);
 
     let bonus = theory.publicationMultiplier;
     let vc1 = getC1(c1.level);
@@ -318,8 +361,8 @@ var tick = (elapsedTime, multiplier) => {
     let omegaterm = omega.pow(getOmegaexp());
     let vterm = velocityTerm.level > 0 ? vtot.pow(getVexp()) : BigNumber.ONE;
 
-    rhodot = dt * bonus * C * vc1 * vc2 * xterm * omegaterm * vterm;
-    currency.value += rhodot;
+    rhodot = BigNumber.from(multiplier) * bonus * C * vc1 * vc2 * xterm * omegaterm * vterm;
+    currency.value += rhodot * BigNumber.from(elapsedTime);
 
     theory.invalidateQuaternaryValues();
 }
@@ -402,33 +445,38 @@ var getTertiaryEquation = () => {
 var getQuaternaryEntries = () => {
     if (quaternaryEntries.length == 0)
     {
-        quaternaryEntries.push(new QuaternaryEntry(null, ''));
+        
         if (stage == 0)
         {
             quaternaryEntries.push(new QuaternaryEntry("{t_s}_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("x_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("{v_x}_{{}\\,}", null));
+            quaternaryEntries.push(new QuaternaryEntry("{v_y}_{{}\\,}", null));
+            quaternaryEntries.push(new QuaternaryEntry("{v_z}_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("B_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("I_{{}\\,}", null));
         }
         else
         {
+            quaternaryEntries.push(new QuaternaryEntry(null, ''));
             quaternaryEntries.push(new QuaternaryEntry("t_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("\\dot{\\rho}_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("x_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("\\omega_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("v_{{}\\,}", null));
+            quaternaryEntries.push(new QuaternaryEntry(null, ''));
         }
-        quaternaryEntries.push(new QuaternaryEntry(null, ''));
     }
 
     if (stage == 0)
     {
-        quaternaryEntries[1].value = ts.toString(2);
-        quaternaryEntries[2].value = numberFormat(x, 2);
-        quaternaryEntries[3].value = numberFormat(vx, 2);
-        quaternaryEntries[4].value = numberFormat(B, 2);
-        quaternaryEntries[5].value = numberFormat(I, 2);
+        quaternaryEntries[0].value = ts.toString(2);
+        quaternaryEntries[1].value = numberFormat(x, 2);
+        quaternaryEntries[2].value = numberFormat(vx, 2);
+        if (velocityTerm.level == 1) quaternaryEntries[3].value = numberFormat(vz*BigNumber.from(Math.sin((omega*ts).toNumber())), 2);
+        if (velocityTerm.level == 1) quaternaryEntries[4].value = numberFormat(vz*BigNumber.from(Math.cos((omega*ts).toNumber())), 2);
+        quaternaryEntries[5].value = numberFormat(B, 2);
+        quaternaryEntries[6].value = numberFormat(I, 2);
     }
     else
     {
