@@ -425,8 +425,8 @@ var getSecondaryEquation = () => {
         
         result += `C = ${numberFormat(C, 2)}\\\\`;
         result += `\\end{matrix}\\\\`
-        result += `\\text{Reset to multiply } v_x \\text{ by }${getvxmultiplier()}\\\\`
-        if(velocityTerm.level > 0) result += `\\text{Reset to multiply } \\sqrt{{v_y}^2+{v_z}^2} \\text{ by } ${getvzmultiplier()}`
+        result += `\\text{Reset } x \\text{ to multiply } v_x \\text{ by }${getvxmultiplier()}\\\\`
+        if(velocityTerm.level > 0) result += `\\text{Reset } x \\text{ to multiply } \\sqrt{{v_y}^2+{v_z}^2} \\text{ by } ${getvzmultiplier()}`
         
     }
 
