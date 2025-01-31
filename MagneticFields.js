@@ -95,6 +95,12 @@ var resetSimulation = () => {
     theory.invalidateQuaternaryValues();
 }
 
+var getvxmultiplier = () => {
+    return (getV1(v1.level) * getV2(v2.level)) * BigNumber.from("1e-20") / vx;
+}
+var getvzmultiplier = () => {
+    return (getV3(v3.level) * getV4(v4.level)) * BigNumber.from("1e-18") / vz;
+}
 
 var init = () => {
     currency = theory.createCurrency();
@@ -364,6 +370,7 @@ var tick = (elapsedTime, multiplier) => {
     rhodot = BigNumber.from(multiplier) * bonus * C * vc1 * vc2 * xterm * omegaterm * vterm;
     currency.value += rhodot * BigNumber.from(elapsedTime);
 
+    if (stage === 1) theory.invalidateSecondaryEquation();
     theory.invalidateQuaternaryValues();
 }
 
@@ -380,7 +387,7 @@ var getPrimaryEquation = () => {
     }
     else
     {
-        theory.primaryEquationHeight = 80;
+        theory.primaryEquationHeight = 70;
         theory.primaryEquationScale = 1.2;
         result += `\\dot{\\rho} = C{c_1}{c_2}x^{${numberFormat(getXexp(),2)}}\\omega^{${numberFormat(getOmegaexp(),2)}}`;
         if (velocityTerm.level > 0) result += `v^{${numberFormat(getVexp(),2)}}`;
@@ -408,13 +415,19 @@ var getSecondaryEquation = () => {
     }
     else
     {
-        theory.secondaryEquationHeight = 65;
-        theory.secondaryEquationScale = 1.1;
+        theory.secondaryEquationHeight = 110;
+        theory.secondaryEquationScale = 1;
+        result += `\\mkern 90mu \\begin{matrix}`
         if (velocityTerm.level > 0)
         {
             result += `v = \\sqrt{{v_x}^2+{v_y}^2+{v_z}^2}\\\\`;
         }
-        result += `C = ${numberFormat(C, 2)}`;
+        
+        result += `C = ${numberFormat(C, 2)}\\\\`;
+        result += `\\end{matrix}\\\\`
+        result += `\\text{Reset to multiply } v_x \\text{ by }${getvxmultiplier()}\\\\`
+        if(velocityTerm.level > 0) result += `\\text{Reset to multiply } \\sqrt{{v_y}^2+{v_z}^2} \\text{ by } ${getvzmultiplier()}`
+        
     }
 
     return result;
@@ -537,6 +550,7 @@ var postPublish = () => {
 
     rhodot = BigNumber.ZERO;
 
+    theory.invalidateSecondaryEquation();
     theory.invalidateQuaternaryValues();
     resetSimulation();
 }
