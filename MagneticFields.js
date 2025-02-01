@@ -12,7 +12,7 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.3"
+"Version 0.3.2"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!";
 var version = 0.3;
@@ -213,8 +213,8 @@ var init = () => {
 
     {
         deltaVariable = theory.createMilestoneUpgrade(1, 1);
-        deltaVariable.description = Localization.getUpgradeAddTermDesc("\\delta");
-        deltaVariable.info = Localization.getUpgradeAddTermInfo("\\delta");
+        deltaVariable.description = Localization.getUpgradeAddTermDesc("\\delta ");
+        deltaVariable.info = Localization.getUpgradeAddTermInfo("\\delta ");
         deltaVariable.canBeRefunded = (_) => (xExp.level === 0 && omegaExp.level === 0);
         deltaVariable.boughtOrRefunded = (_) => {
             theory.invalidateTertiaryEquation();
@@ -416,7 +416,7 @@ var getSecondaryEquation = () => {
     else
     {
         theory.secondaryEquationHeight = 110;
-        theory.secondaryEquationScale = 1;
+        theory.secondaryEquationScale = 0.95;
         result += `\\mkern 90mu \\begin{matrix}`
         if (velocityTerm.level > 0)
         {
