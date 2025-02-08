@@ -12,7 +12,7 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.4"
+"Version 0.4.1"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!";
 var version = 0.4;
@@ -402,7 +402,14 @@ var getSecondaryEquation = () => {
             result += `v_y = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
             result += `v_z = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
         }
-        result += `\\dot{I} = \\frac{a_1}{400}\\left(10^{-15} - \\frac{I}{a_2}\\right)\\\\`;
+        if (a1Exp.level == 0)
+        {
+            result += `\\dot{I\\text{ }} = \\frac{a_1}{400}\\left(10^{-15} - \\frac{I}{a_2}\\right)\\\\`;
+        }
+        else
+        {
+            result += `\\dot{I\\text{ }} = \\frac{{a_1}^{1.01}}{400}\\left(10^{-15} - \\frac{I}{a_2}\\right)\\\\`;
+        }
     }
     else
     {
@@ -439,8 +446,7 @@ var getTertiaryEquation = () => {
     }
     else
     {
-        if (tauRate == 1) result = `${theory.latexSymbol}=\\max\\rho`;
-        else result = `${theory.latexSymbol}=\\max\\rho^{${tauRate}}`;
+        result = `${theory.latexSymbol}=\\max\\rho`;
     }
     
     return result;
@@ -516,8 +522,8 @@ var goToNextStage = () => {
 
 var canResetStage = () => true;
 
-const resetMessage1 = "Resets x but updates vx with the latest values of v1 and v2"
-const resetMessage2 = "Resets x but updates vx, vy and vz with the latest values of v1, v2, v3 and v4"
+const resetMessage1 = "Resets x and updates vx with the latest values of v1 and v2"
+const resetMessage2 = "Resets x and updates vx, vy and vz with the latest values of v1, v2, v3 and v4"
 
 var getResetStageMessage = () => velocityTerm.level > 0 ? resetMessage2 : resetMessage1
 
