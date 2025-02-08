@@ -254,10 +254,12 @@ var init = () => {
         vExp = theory.createMilestoneUpgrade(4, 2);
         vExp.description = Localization.getUpgradeIncCustomExpDesc("v", "0.31");
         vExp.info = Localization.getUpgradeIncCustomExpInfo("v", "0.31");
+        vExp.canBeRefunded = (_) => (a1Exp.level === 0)
         vExp.boughtOrRefunded = (_) => {
             updateC();
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
+            updateAvailability();
         }
     }
 
@@ -324,7 +326,7 @@ var updateAvailability = () => {
     xExp.isAvailable = deltaVariable.level > 0;
     omegaExp.isAvailable = deltaVariable.level > 0;
     vExp.isAvailable = (xExp.level + omegaExp.level === 4);
-    a1Exp.isAvailable = (xExp.level + omegaExp.level === 4);
+    a1Exp.isAvailable = (vExp.level === 2);
 
     delta.isAvailable = deltaVariable.level > 0;
     v3.isAvailable = velocityTerm.level > 0;
