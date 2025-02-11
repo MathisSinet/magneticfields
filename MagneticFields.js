@@ -58,8 +58,12 @@ let endtau = BigNumber.from("1e600")
 var numberFormat = (value, decimals) => {
     if (value >= BigNumber.ZERO)
     {
-        if (value > BigNumber.from(0.1) || value == BigNumber.ZERO) 
+        if (value >= BigNumber.from(0.1) || value == BigNumber.ZERO) 
         {
+            if (value > BigNumber.ZERO && value < BigNumber.ONE && decimals < 3)
+            {
+                return value.toString(3);
+            }
             return value.toString(decimals);
         }
         else
@@ -72,7 +76,7 @@ var numberFormat = (value, decimals) => {
     else
     {
         value = -value;
-        if (value > BigNumber.from(0.1) || value == BigNumber.ZERO) 
+        if (value >= BigNumber.from(0.1) || value == BigNumber.ZERO) 
         {
             return (-value).toString(decimals);
         }
@@ -382,8 +386,8 @@ var getPrimaryEquation = () => {
     {
         theory.primaryEquationHeight = 70;
         theory.primaryEquationScale = 1.2;
-        result += `\\dot{\\rho} = C{c_1}{c_2}x^{${numberFormat(getXexp(),2)}}\\omega^{${numberFormat(getOmegaexp(),2)}}`;
-        if (velocityTerm.level > 0) result += `v^{${numberFormat(getVexp(),2)}}`;
+        result += `\\dot{\\rho} = C{c_1}{c_2}x^{${getXexpstr()}}\\omega^{${getOmegaexpstr()}}`;
+        if (velocityTerm.level > 0) result += `v^{${getVexpstr()}}`;
     }
 
     return result;
@@ -574,8 +578,11 @@ var setInternalState = (state) => {
 var getDebugMult = (level) => Utils.getStepwisePowerSum(level, 10, 9, 1);
 
 var getXexp = () => (BigNumber.from(3.2 + 0.1*xExp.level));
+var getXexpstr = () => (xExp.level == 0 ? "3.2" : xExp.level == 1 ? "3.3" : "3.4")
 var getOmegaexp = () => (BigNumber.from(4.1 + 0.15*omegaExp.level));
+var getOmegaexpstr = () => (omegaExp.level == 0 ? "4.1" : omegaExp.level == 1 ? "4.25" : "4.4")
 var getVexp = () => (BigNumber.from(1.3 + 0.31*vExp.level));
+var getVexpstr = () => (vExp.level == 0 ? "1.3" : vExp.level == 1 ? "1.61" : "1.92")
 var getA1exp = () => (BigNumber.ONE + a1Exp.level*0.01);
 
 var updateC = () => {
