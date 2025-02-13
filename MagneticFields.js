@@ -205,7 +205,7 @@ var init = () => {
 
     {
         velocityTerm = theory.createMilestoneUpgrade(0, 1);
-        velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")}; $\\downarrow C$`;
+        velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")}; $↑ C$`;
         velocityTerm.info = `${Localization.getUpgradeAddTermInfo("v")}; ${Localization.getUpgradeMultCustomInfo("C", "2.09e25")}`;
         velocityTerm.canBeRefunded = (_) => (deltaVariable.level === 0);
         velocityTerm.boughtOrRefunded = (_) => {
