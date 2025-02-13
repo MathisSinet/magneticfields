@@ -205,8 +205,9 @@ var init = () => {
 
     {
         velocityTerm = theory.createMilestoneUpgrade(0, 1);
-        velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")}; ↑ $C$`;
-        velocityTerm.info = `${Localization.getUpgradeAddTermInfo("v")}; ${Localization.getUpgradeMultCustomInfo("C", "2.09e25")}`;
+        //velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")} ; ↑ $C$`;
+        velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")} ; ${Localization.getUpgradeMultCustomDesc("C", "2.09e25")}`;
+        velocityTerm.info = `${Localization.getUpgradeAddTermInfo("v")} ; ${Localization.getUpgradeMultCustomInfo("C", "2.09e25")}`;
         velocityTerm.canBeRefunded = (_) => (deltaVariable.level === 0);
         velocityTerm.boughtOrRefunded = (_) => {
             updateC();
@@ -230,8 +231,9 @@ var init = () => {
 
     {
         xExp = theory.createMilestoneUpgrade(2, 2);
-        xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")}; ↑ $C$`;
-        xExp.info = `${Localization.getUpgradeIncCustomExpInfo("x", "0.1")}; ${Localization.getUpgradeMultCustomInfo("C", "22.9")}`
+        //xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")}; ↑ $C$`;
+        xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")} ; ${Localization.getUpgradeMultCustomDesc("C", "22.9")}`;
+        xExp.info = `${Localization.getUpgradeIncCustomExpInfo("x", "0.1")} ; ${Localization.getUpgradeMultCustomInfo("C", "22.9")}`
         xExp.canBeRefunded = (_) => (vExp.level === 0 && a1Exp.level === 0);
         xExp.boughtOrRefunded = (_) => {
             updateC();
@@ -243,8 +245,8 @@ var init = () => {
 
     {
         omegaExp = theory.createMilestoneUpgrade(3, 2);
-        omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")}; ↑ $C$`;
-        omegaExp.info = `${Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.15")}; ${Localization.getUpgradeMultCustomInfo("C", "1.15e5")}`;
+        omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")} ; ${Localization.getUpgradeMultCustomDesc("C", "1.15e5")}`;
+        omegaExp.info = `${Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.15")} ; ${Localization.getUpgradeMultCustomInfo("C", "1.15e5")}`;
         omegaExp.canBeRefunded = (_) => (vExp.level === 0 && a1Exp.level === 0);
         omegaExp.boughtOrRefunded = (_) => {
             updateC();
@@ -256,8 +258,8 @@ var init = () => {
 
     {
         vExp = theory.createMilestoneUpgrade(4, 2);
-        vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")}; ↑ $C$`;
-        vExp.info = `${Localization.getUpgradeIncCustomExpInfo("v", "0.31")}; ${Localization.getUpgradeMultCustomInfo("C", "35.5")}`;
+        vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")} ; ${Localization.getUpgradeMultCustomDesc("C", "35.5")}`;
+        vExp.info = `${Localization.getUpgradeIncCustomExpInfo("v", "0.31")} ; ${Localization.getUpgradeMultCustomInfo("C", "35.5")}`;
         vExp.canBeRefunded = (_) => (a1Exp.level === 0)
         vExp.boughtOrRefunded = (_) => {
             updateC();
