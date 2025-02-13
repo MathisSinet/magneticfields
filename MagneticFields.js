@@ -12,7 +12,7 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.4.3"
+"Version 0.4.4"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!";
 var version = 0.4;
@@ -51,7 +51,7 @@ var C = BigNumber.ZERO;
 //var resetUpgrade;
 var c1, c2, v1, v2, v3, v4, a1, a2, delta;
 
-var chapter1, chapter2, chapter3, chapter4, chapter5, chapter6, chapter7;
+var chapter1, chapter2, chapter3, chapter4, chapter5, chapter6;
 
 let endtau = BigNumber.from("1e600")
 
@@ -205,8 +205,8 @@ var init = () => {
 
     {
         velocityTerm = theory.createMilestoneUpgrade(0, 1);
-        //velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")} ; ↑ $C$`;
-        velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")} ; ${Localization.getUpgradeMultCustomDesc("C", "2.09e25")}`;
+        velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")} ; $\\uparrow C$`;
+        //velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")} ; ${Localization.getUpgradeMultCustomDesc("C", "2.09e25")}`;
         velocityTerm.info = `${Localization.getUpgradeAddTermInfo("v")} ; ${Localization.getUpgradeMultCustomInfo("C", "2.09e25")}`;
         velocityTerm.canBeRefunded = (_) => (deltaVariable.level === 0);
         velocityTerm.boughtOrRefunded = (_) => {
@@ -222,7 +222,7 @@ var init = () => {
         deltaVariable = theory.createMilestoneUpgrade(1, 1);
         deltaVariable.description = Localization.getUpgradeAddTermDesc("\\delta ");
         deltaVariable.info = Localization.getUpgradeAddTermInfo("\\delta ");
-        deltaVariable.canBeRefunded = (_) => (xExp.level === 0 && omegaExp.level === 0);
+        deltaVariable.canBeRefunded = (_) => (omegaExp.level === 0);
         deltaVariable.boughtOrRefunded = (_) => {
             theory.invalidateTertiaryEquation();
             updateAvailability();
@@ -230,24 +230,11 @@ var init = () => {
     }
 
     {
-        xExp = theory.createMilestoneUpgrade(2, 2);
-        //xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")}; ↑ $C$`;
-        xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")} ; ${Localization.getUpgradeMultCustomDesc("C", "22.9")}`;
-        xExp.info = `${Localization.getUpgradeIncCustomExpInfo("x", "0.1")} ; ${Localization.getUpgradeMultCustomInfo("C", "22.9")}`
-        xExp.canBeRefunded = (_) => (vExp.level === 0 && a1Exp.level === 0);
-        xExp.boughtOrRefunded = (_) => {
-            updateC();
-            theory.invalidatePrimaryEquation();
-            theory.invalidateSecondaryEquation();
-            updateAvailability();
-        }
-    }
-
-    {
-        omegaExp = theory.createMilestoneUpgrade(3, 2);
+        omegaExp = theory.createMilestoneUpgrade(2, 2);
         omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")} ; ${Localization.getUpgradeMultCustomDesc("C", "1.15e5")}`;
+        omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")} ; $\\uparrow C$`;
         omegaExp.info = `${Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.15")} ; ${Localization.getUpgradeMultCustomInfo("C", "1.15e5")}`;
-        omegaExp.canBeRefunded = (_) => (vExp.level === 0 && a1Exp.level === 0);
+        omegaExp.canBeRefunded = (_) => (xExp.level === 0);
         omegaExp.boughtOrRefunded = (_) => {
             updateC();
             theory.invalidatePrimaryEquation();
@@ -257,8 +244,23 @@ var init = () => {
     }
 
     {
+        xExp = theory.createMilestoneUpgrade(3, 2);
+        xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")} ; $\\uparrow C$`;
+        //xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")} ; ${Localization.getUpgradeMultCustomDesc("C", "22.9")}`;
+        xExp.info = `${Localization.getUpgradeIncCustomExpInfo("x", "0.1")} ; ${Localization.getUpgradeMultCustomInfo("C", "22.9")}`
+        xExp.canBeRefunded = (_) => (vExp.level === 0);
+        xExp.boughtOrRefunded = (_) => {
+            updateC();
+            theory.invalidatePrimaryEquation();
+            theory.invalidateSecondaryEquation();
+            updateAvailability();
+        }
+    }
+    
+    {
         vExp = theory.createMilestoneUpgrade(4, 2);
-        vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")} ; ${Localization.getUpgradeMultCustomDesc("C", "35.5")}`;
+        vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")} ; $\\uparrow C$`;
+        //vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")} ; ${Localization.getUpgradeMultCustomDesc("C", "35.5")}`;
         vExp.info = `${Localization.getUpgradeIncCustomExpInfo("v", "0.31")} ; ${Localization.getUpgradeMultCustomInfo("C", "35.5")}`;
         vExp.canBeRefunded = (_) => (a1Exp.level === 0)
         vExp.boughtOrRefunded = (_) => {
@@ -304,7 +306,7 @@ var init = () => {
     story4 += "You start looking closer at the exponents of x and ω.\n"
     story4 += "Right! Increasing them would be a nice idea to progress further.\n"
     story4 += "It's time for the old exponent trick.\n"
-    chapter4 = theory.createStoryChapter(3, "An old trick", story4, () => xExp.level + omegaExp.level > 0);
+    chapter4 = theory.createStoryChapter(3, "An old trick", story4, () => omegaExp.level > 0);
 
     let story5 = "Since the beginning, you were confident about this project.\n"
     story5 += "Exploring new concepts with electromagnetism was really fun, it feels refreshing after so much pure maths.\n"
@@ -313,7 +315,7 @@ var init = () => {
     story5 += "Big numbers aren't suited for physics, it seems.\n"
     story5 += "As you reconsider your choice, you realize that you aren't out of options.\n"
     story5 += "More variables have exponents to be tinkered with...\n"
-    chapter5 = theory.createStoryChapter(4, "Reconsideration", story5, () => vExp.level + a1Exp.level > 0);
+    chapter5 = theory.createStoryChapter(4, "Reconsideration", story5, () => vExp.level > 0);
 
     let story6 = "The magnetic fields project paid off\n"
     story6 += "You finally did it, you reached 1e600τ!\n"
@@ -329,10 +331,10 @@ var init = () => {
 
 var updateAvailability = () => {
     deltaVariable.isAvailable = velocityTerm.level > 0;
-    xExp.isAvailable = deltaVariable.level > 0;
     omegaExp.isAvailable = deltaVariable.level > 0;
-    vExp.isAvailable = (xExp.level + omegaExp.level === 4);
-    a1Exp.isAvailable = (vExp.level === 2);
+    xExp.isAvailable = omegaExp.level === 2;
+    vExp.isAvailable = xExp.level === 2;
+    a1Exp.isAvailable = vExp.level === 2;
 
     delta.isAvailable = deltaVariable.level > 0;
     v3.isAvailable = velocityTerm.level > 0;
@@ -388,7 +390,7 @@ var getPrimaryEquation = () => {
     {
         theory.primaryEquationHeight = 70;
         theory.primaryEquationScale = 1.2;
-        result += `\\dot{\\rho} = C{c_1}{c_2}x^{${getXexpstr()}}\\omega^{${getOmegaexpstr()}}`;
+        result += `\\dot{\\rho} = C{c_1}{c_2}\\omega^{${getOmegaexpstr()}}x^{${getXexpstr()}}`;
         if (velocityTerm.level > 0) result += `v^{${getVexpstr()}}`;
     }
 
@@ -576,8 +578,6 @@ var setInternalState = (state) => {
   
     updateC();
   };
-
-var getDebugMult = (level) => Utils.getStepwisePowerSum(level, 10, 9, 1);
 
 var getXexp = () => (BigNumber.from(3.2 + 0.1*xExp.level));
 var getXexpstr = () => (xExp.level == 0 ? "3.2" : xExp.level == 1 ? "3.3" : "3.4")
