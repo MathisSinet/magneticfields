@@ -12,7 +12,7 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.4.4"
+"Version 0.4.5"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!";
 var version = 0.4;
@@ -205,9 +205,9 @@ var init = () => {
 
     {
         velocityTerm = theory.createMilestoneUpgrade(0, 1);
-        velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")} ; $\\uparrow C$`;
+        velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")}; $\\uparrow C$`;
         //velocityTerm.description = `${Localization.getUpgradeAddTermDesc("v")} ; ${Localization.getUpgradeMultCustomDesc("C", "2.09e25")}`;
-        velocityTerm.info = `${Localization.getUpgradeAddTermInfo("v")} ; ${Localization.getUpgradeMultCustomInfo("C", "2.09e25")}`;
+        velocityTerm.info = `${Localization.getUpgradeAddTermInfo("v")} \\\\ ${Localization.getUpgradeMultCustomInfo("C", "2.09e25")}`;
         velocityTerm.canBeRefunded = (_) => (deltaVariable.level === 0);
         velocityTerm.boughtOrRefunded = (_) => {
             updateC();
@@ -231,9 +231,9 @@ var init = () => {
 
     {
         omegaExp = theory.createMilestoneUpgrade(2, 2);
-        omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")} ; ${Localization.getUpgradeMultCustomDesc("C", "1.15e5")}`;
-        omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")} ; $\\uparrow C$`;
-        omegaExp.info = `${Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.15")} ; ${Localization.getUpgradeMultCustomInfo("C", "1.15e5")}`;
+        //omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")} ; ${Localization.getUpgradeMultCustomDesc("C", "1.15e5")}`;
+        omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")}; $\\uparrow C$`;
+        omegaExp.info = `${Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.15")} \\\\ ${Localization.getUpgradeMultCustomInfo("C", "1.15e5")}`;
         omegaExp.canBeRefunded = (_) => (xExp.level === 0);
         omegaExp.boughtOrRefunded = (_) => {
             updateC();
@@ -245,9 +245,9 @@ var init = () => {
 
     {
         xExp = theory.createMilestoneUpgrade(3, 2);
-        xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")} ; $\\uparrow C$`;
+        xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")}; $\\uparrow C$`;
         //xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")} ; ${Localization.getUpgradeMultCustomDesc("C", "22.9")}`;
-        xExp.info = `${Localization.getUpgradeIncCustomExpInfo("x", "0.1")} ; ${Localization.getUpgradeMultCustomInfo("C", "22.9")}`
+        xExp.info = `${Localization.getUpgradeIncCustomExpInfo("x", "0.1")} \\\\ ${Localization.getUpgradeMultCustomInfo("C", "22.9")}`
         xExp.canBeRefunded = (_) => (vExp.level === 0);
         xExp.boughtOrRefunded = (_) => {
             updateC();
@@ -259,9 +259,9 @@ var init = () => {
     
     {
         vExp = theory.createMilestoneUpgrade(4, 2);
-        vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")} ; $\\uparrow C$`;
+        vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")}; $\\uparrow C$`;
         //vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")} ; ${Localization.getUpgradeMultCustomDesc("C", "35.5")}`;
-        vExp.info = `${Localization.getUpgradeIncCustomExpInfo("v", "0.31")} ; ${Localization.getUpgradeMultCustomInfo("C", "35.5")}`;
+        vExp.info = `${Localization.getUpgradeIncCustomExpInfo("v", "0.31")} \\\\ ${Localization.getUpgradeMultCustomInfo("C", "35.5")}`;
         vExp.canBeRefunded = (_) => (a1Exp.level === 0)
         vExp.boughtOrRefunded = (_) => {
             updateC();
@@ -382,9 +382,9 @@ var getPrimaryEquation = () => {
     {
         theory.primaryEquationHeight = 85;
         theory.primaryEquationScale = velocityTerm.level > 0 ? 0.95 : 1.05;
-        result += `x = {v_x}{t_s}\\\\`;
+        result += `\\mkern 4mu x = {v_x}{t_s}\\\\`;
         result += `B = {{\\mu}_0}{I}{\\delta}\\\\`;
-        result += `\\omega = \\frac{q}{m}{B}`;
+        result += `\\mkern 3mu \\omega = \\frac{q}{m}{B}`;
     }
     else
     {
@@ -409,8 +409,8 @@ var getSecondaryEquation = () => {
         {
             theory.secondaryEquationHeight = 100;
             theory.secondaryEquationScale = 0.95;
-            result += `v_y = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
-            result += `v_z = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
+            result += `v_y \\mkern 1mu = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
+            result += `v_z \\mkern 1mu = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
         }
         if (a1Exp.level == 0)
         {
@@ -425,7 +425,7 @@ var getSecondaryEquation = () => {
     {
         theory.secondaryEquationHeight = 110;
         theory.secondaryEquationScale = 1;
-        result += `\\mkern 90mu \\begin{matrix}`
+        result += `\\mkern 70mu \\begin{matrix}`
         if (velocityTerm.level > 0)
         {
             result += `v = \\sqrt{{v_x}^2+{v_y}^2+{v_z}^2}\\\\`;
@@ -532,8 +532,8 @@ var goToNextStage = () => {
 
 var canResetStage = () => true;
 
-const resetMessage1 = "Resets x and updates vx with the latest values of v1 and v2"
-const resetMessage2 = "Resets x and updates vx, vy and vz with the latest values of v1, v2, v3 and v4"
+const resetMessage1 = "Resets x and updates vx with the latest values of v1 and v2."
+const resetMessage2 = "Resets x and updates vx, vy and vz with the latest values of v1, v2, v3 and v4."
 
 var getResetStageMessage = () => velocityTerm.level > 0 ? resetMessage2 : resetMessage1
 
@@ -602,7 +602,7 @@ var getM = () => defaultmass;
 
 var getC1 = (level) => Utils.getStepwisePowerSum(level, 2, 7, 0);
 var getC2 = (level) => BigNumber.TWO.pow(level);
-var getA1 = (level) => Utils.getStepwisePowerSum(level, 2, 5, 2);
+var getA1 = (level) => Utils.getStepwisePowerSum(level, 2, 5, 3);
 var getA2 = (level) => BigNumber.from(1.25).pow(level);
 var getDelta = (level) => deltaVariable.level > 0 ? BigNumber.from(1.1).pow(level) : BigNumber.ONE;
 var getV1 = (level) => Utils.getStepwisePowerSum(level, 2, 10, 1);
