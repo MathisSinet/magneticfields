@@ -12,7 +12,7 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.4.5"
+"Version 0.4.6"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!";
 var version = 0.4;
@@ -50,6 +50,9 @@ var C = BigNumber.ZERO;
 
 //var resetUpgrade;
 var c1, c2, v1, v2, v3, v4, a1, a2, delta;
+
+var pubTime = 0;
+var resetTime = 0;
 
 var chapter1, chapter2, chapter3, chapter4, chapter5, chapter6;
 
@@ -90,8 +93,44 @@ var numberFormat = (value, decimals) => {
 }
 
 
+let getTimeString = (time) =>
+{
+    let minutes = Math.floor(time / 60);
+    let seconds = time - minutes*60;
+    let timeString;
+    if(minutes >= 60)
+    {
+        let hours = Math.floor(minutes / 60);
+        if (hours >= 24)
+        {
+            let days = Math.floor(hours / 24);
+            hours -= days*24;
+            minutes -= hours*60 + days*60*24;
+            timeString = `
+                ${days}d  
+                ${hours}:${
+                minutes.toString().padStart(2, '0')}:${
+                seconds.toFixed(1).padStart(4, '0')}`;
+        }
+        else {
+            minutes -= hours*60;
+            timeString = `${hours}:${
+            minutes.toString().padStart(2, '0')}:${
+            seconds.toFixed(1).padStart(4, '0')}`;
+        }
+    }
+    else
+    {
+        timeString = `${minutes.toString()}:${
+        seconds.toFixed(1).padStart(4, '0')}`;
+    }
+    return timeString;
+};
+
+
 var resetSimulation = () => {
     ts = BigNumber.ZERO;
+    resetTime = 0;
     x = BigNumber.ZERO;
     vx = (getV1(v1.level) * getV2(v2.level)) * BigNumber.from("1e-20");
     vz = (getV3(v3.level) * getV4(v4.level)) * BigNumber.from("1e-18");
@@ -197,6 +236,23 @@ var init = () => {
     theory.createPublicationUpgrade(0, currency, 1e8);
     theory.createBuyAllUpgrade(1, currency, 1e10);
     theory.createAutoBuyerUpgrade(2, currency, 1e13);
+    {
+        pubTimeOverlay = theory.createPermanentUpgrade(11, currency, new FreeCost);
+        pubTimeOverlay.getDescription = () => `Publication time: ${getTimeString(pubTime)}`;
+        pubTimeOverlay.info = "Elapsed time since the last publication";
+        pubTimeOverlay.boughtOrRefunded = (_) =>
+        {
+            pubTimeOverlay.level = 0;
+        }
+
+        resetTimeOverlay = theory.createPermanentUpgrade(12, currency, new FreeCost);
+        resetTimeOverlay.getDescription = () => `Reset time: ${getTimeString(resetTime)}`;
+        resetTimeOverlay.info = "Elapsed time since the last particle reset";
+        resetTimeOverlay.boughtOrRefunded = (_) =>
+        {
+            resetTimeOverlay.level = 0;
+        }
+    }
 
     ///////////////////////
     //// Milestone Upgrades
@@ -347,6 +403,8 @@ var tick = (elapsedTime, multiplier) => {
     if (c1.level == 0) return;
 
     let dt = BigNumber.from(elapsedTime * multiplier);
+    pubTime += elapsedTime;
+    resetTime += elapsedTime;
 
     let bonus = theory.publicationMultiplier;
     let vc1 = getC1(c1.level);
@@ -409,8 +467,8 @@ var getSecondaryEquation = () => {
         {
             theory.secondaryEquationHeight = 100;
             theory.secondaryEquationScale = 0.95;
-            result += `v_y \\mkern 1mu = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t})\\\\`;
-            result += `v_z \\mkern 1mu = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t})\\\\`;
+            result += `v_y \\mkern 1mu = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\sin(\\omega{t_s})\\\\`;
+            result += `v_z \\mkern 1mu = [{v_3}{v_4}\\times{10^{-18}}]({t_s}=0)\\times\\cos(\\omega{t_s})\\\\`;
         }
         if (a1Exp.level == 0)
         {
@@ -557,6 +615,8 @@ var postPublish = () => {
 
     rhodot = BigNumber.ZERO;
 
+    pubTime = 0;
+
     theory.invalidateSecondaryEquation();
     theory.invalidateQuaternaryValues();
     resetSimulation();
@@ -564,7 +624,7 @@ var postPublish = () => {
 
 var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
 
-var getInternalState = () => `${x.toNumber()} ${vx.toNumber()} ${vz.toNumber()} ${vtot.toNumber()} ${I.toNumber()} ${t} ${ts}`;
+var getInternalState = () => `${x.toNumber()} ${vx.toNumber()} ${vz.toNumber()} ${vtot.toNumber()} ${I.toNumber()} ${t} ${ts} ${pubTime} ${resetTime}`;
 
 var setInternalState = (state) => {
     let values = state.split(" ");
@@ -575,6 +635,8 @@ var setInternalState = (state) => {
     if (values.length > 4) I = BigNumber.from(values[4]);
     if (values.length > 5) t = parseBigNumber(values[5]);
     if (values.length > 6) ts = parseBigNumber(values[6]);
+    if (values.length > 7) pubTime = Number(values[7]);
+    if (values.length > 8) pubTime = Number(values[8]);
   
     updateC();
   };
