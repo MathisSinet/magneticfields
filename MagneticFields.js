@@ -13,9 +13,10 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.5"
+"Version 0.5.1"
 var authors = "Mathis S.\n" +
-"Thanks to the amazing Exponential Idle community for their support and feedback on this theory!";
+"Thanks to the amazing Exponential Idle community for their support and feedback on this theory!\n"+
+"Special thanks to prop for helping me with parts of the code.";
 var version = 0.4;
 
 const tauRate = 1;
@@ -239,7 +240,7 @@ var createResetMenu = () => {
     let menu = ui.createPopup(
     {
         isPeekable: true,
-        title: "Reset Particle menu",
+        title: "Reset Particle Menu",
         content: ui.createStackLayout(
         {
             children:
@@ -584,10 +585,9 @@ var tick = (elapsedTime, multiplier) => {
     rhodot = BigNumber.from(multiplier) * bonus * C * vc1 * vc2 * xterm * omegaterm * vterm;
     currency.value += rhodot * BigNumber.from(elapsedTime);
 
-    if (stage === 1) theory.invalidateSecondaryEquation();
     theory.invalidateQuaternaryValues();
 
-    if (autoResetUpgrade.level > 0 && isAutoResetEnabled && autoResetThresold > 1.05 && getvxmultiplier() > autoResetThresold)
+    if (autoResetUpgrade.level > 0 && isAutoResetEnabled && autoResetThresold > 1.05 && getvxmultiplier() >= autoResetThresold)
     {
         resetSimulation();
     }
