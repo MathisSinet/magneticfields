@@ -4,6 +4,7 @@ import { BigNumber } from "../api/BigNumber";
 import { theory, QuaternaryEntry } from "../api/Theory";
 import { Utils } from "../api/Utils";
 import { ui } from "../api/ui/UI";
+import { log } from "winjs";
 
 var id = "magnetic_fields";
 var name = "Magnetic Fields";
@@ -13,7 +14,7 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.5.1"
+"Version 0.5.2"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!\n"+
 "Special thanks to prop for helping me with parts of the code.";
@@ -248,7 +249,7 @@ var createResetMenu = () => {
                 ui.createLatexLabel
                 ({
                     margin: new Thickness(0, 0, 0, 6),
-                    text: "After a reset of the particle, you'll have:",
+                    text: "After a reset of the particle, you will have:",
                     horizontalTextAlignment: TextAlignment.CENTER,
                     verticalTextAlignment: TextAlignment.CENTER
                 }),
@@ -573,7 +574,12 @@ var tick = (elapsedTime, multiplier) => {
     x += dt * vx;
     
     let icap = va2*i0;
-    I = icap - (icap - I) * BigNumber.E.pow(-dt*va1/(BigNumber.FOUR * BigNumber.HUNDRED * va2))
+    let scale = BigNumber.ONE - BigNumber.E.pow(-dt*va1/(BigNumber.FOUR * BigNumber.HUNDRED * va2))
+    if (scale < BigNumber.from(1e-13))
+    {
+        scale = dt*va1/(BigNumber.FOUR * BigNumber.HUNDRED * va2);
+    }
+    I += scale * (icap - I)
     I = I.min(icap);
     B = mu0 * I * getDelta(delta.level);
     omega = (getQ() / getM()) * B;
@@ -708,8 +714,15 @@ var getQuaternaryEntries = () => {
         quaternaryEntries[0].value = ts.toString(2);
         quaternaryEntries[1].value = numberFormat(x, 2);
         quaternaryEntries[2].value = numberFormat(vx, 2);
-        if (velocityTerm.level == 1) quaternaryEntries[3].value = numberFormat(vz*BigNumber.from(Math.sin((omega*ts).toNumber())), 2);
-        if (velocityTerm.level == 1) quaternaryEntries[4].value = numberFormat(vz*BigNumber.from(Math.cos((omega*ts).toNumber())), 2);
+        if (omega*ts < BigNumber.from(1e100))
+        {
+            if (velocityTerm.level == 1) quaternaryEntries[3].value = numberFormat(vz*BigNumber.from(Math.sin((omega*ts).toNumber())), 2);
+            if (velocityTerm.level == 1) quaternaryEntries[4].value = numberFormat(vz*BigNumber.from(Math.cos((omega*ts).toNumber())), 2);
+        }
+        else {
+            quaternaryEntries[3].value = "...";
+            quaternaryEntries[4].value = "...";
+        }
         quaternaryEntries[5].value = numberFormat(B, 2);
         quaternaryEntries[6].value = numberFormat(I, 2);
     }
