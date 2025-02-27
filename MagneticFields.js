@@ -3,6 +3,7 @@ import { Localization } from "../api/Localization";
 import { BigNumber } from "../api/BigNumber";
 import { theory, QuaternaryEntry } from "../api/Theory";
 import { Utils } from "../api/Utils";
+import { ui } from "../api/ui/UI";
 
 var id = "magnetic_fields";
 var name = "Magnetic Fields";
@@ -12,7 +13,7 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.4.6"
+"Version 0.5"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!";
 var version = 0.4;
@@ -50,9 +51,13 @@ var C = BigNumber.ZERO;
 
 //var resetUpgrade;
 var c1, c2, v1, v2, v3, v4, a1, a2, delta;
+var autoResetUpgrade;
 
 var pubTime = 0;
 var resetTime = 0;
+
+var isAutoResetEnabled = false;
+var autoResetThresold = 2;
 
 var chapter1, chapter2, chapter3, chapter4, chapter5, chapter6;
 
@@ -147,6 +152,148 @@ var getvmultiplier = () => {
     return (vxn.pow(BigNumber.TWO) + vzn.pow(BigNumber.TWO)).sqrt() / vtot;
 }
 
+
+const resetButton = ui.createButton(
+    {
+        text:"↺",
+        margin: new Thickness(1),
+        padding: new Thickness(1),
+        fontSize: ui.screenHeight / 46,
+        widthRequest: ui.screenWidth / 12,
+        heightRequest: ui.screenHeight / 26,
+        onReleased: () => {
+            Sound.playClick();
+            createResetMenu().show();
+        }
+    }
+)
+
+var getEquationOverlay = () =>
+{
+    let result = ui.createGrid
+    ({
+        inputTransparent: true,
+        cascadeInputTransparent: false,
+        children:
+        [
+            ui.createGrid
+            ({
+                row: 0, column: 0,
+                margin: new Thickness(4),
+                horizontalOptions: LayoutOptions.START,
+                verticalOptions: LayoutOptions.END,
+                inputTransparent: true,
+                cascadeInputTransparent: false,
+                children:
+                [
+                    resetButton
+                ]
+            }),
+        ]
+    });
+    return result;
+}
+
+var createResetMenu = () => {
+    let tmpThreshold = autoResetThresold;
+
+    let autoResetSwitch = ui.createSwitch
+    ({
+        row: 0, column: 1,
+        horizontalOptions: LayoutOptions.END,
+        isToggled: isAutoResetEnabled,
+        onToggled: () =>
+        {
+            Sound.playClick();
+            isAutoResetEnabled = autoResetSwitch.isToggled;
+        }
+    });
+
+    let thresholdEntry = ui.createEntry
+    ({
+        row: 0, column: 0,
+        text: tmpThreshold.toString(),
+        placeholder: '2',
+        placeholderColor: Color.TEXT_MEDIUM,
+        keyboard: Keyboard.NUMERIC,
+        horizontalTextAlignment: TextAlignment.END,
+        onTextChanged: (ot, nt) =>
+        {
+            let tmpML = parseFloat(nt) ?? tmpThreshold;
+            if(isNaN(tmpML) || tmpML < 1.1 || tmpML > 100)
+                tmpML = 2;
+            tmpThreshold = tmpML;
+        }
+    });
+    let saveBtn = ui.createButton
+    ({
+        text: "Save",
+        onClicked: () =>
+        {
+            Sound.playClick();
+            autoResetThresold = tmpThreshold;
+        },
+        isVisible: autoResetUpgrade.level > 0
+    })
+
+    let menu = ui.createPopup(
+    {
+        isPeekable: true,
+        title: "Reset Particle menu",
+        content: ui.createStackLayout(
+        {
+            children:
+            [
+                ui.createLatexLabel
+                ({
+                    margin: new Thickness(0, 0, 0, 6),
+                    text: "After a reset of the particle, you'll have:",
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
+                }),
+                ui.createLatexLabel
+                ({
+                    margin: new Thickness(0, 0, 0, 6),
+                    text: () => `$x: ${numberFormat(x, 2)}\\rightarrow 0$ \\\\`+
+                    `$v_x: ${numberFormat(vx, 2)}\\rightarrow${numberFormat(vx*getvxmultiplier(),2)}\\,(\\times${numberFormat(getvxmultiplier(), 2)})$ \\\\`+
+                    (velocityTerm.level > 0 ? `$v: ${numberFormat(vtot, 2)}\\rightarrow${numberFormat(vtot*getvmultiplier(),2)}\\,(\\times${numberFormat(getvmultiplier(), 2)})$` : ""),
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
+                }),
+                ui.createButton
+                ({
+                    margin: new Thickness(0, 0, 0, 6),
+                    text: () => "Reset now",
+                    onReleased: () => resetSimulation()
+                }),
+                ui.createLatexLabel
+                ({
+                    margin: new Thickness(0, 0, 0, 6),
+                    text: () => `Automatically reset the particle to multiply $v_x$ by:`,
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER,
+                    isVisible: autoResetUpgrade.level > 0,
+                }),
+                ui.createGrid
+                ({
+                    columnDefinitions: ['1*', 'auto'],
+                    children:
+                    [
+                        thresholdEntry,
+                        autoResetSwitch
+                    ],
+                    isVisible: autoResetUpgrade.level > 0
+                }),
+                saveBtn
+            ]
+        }
+        )
+    }
+    )
+
+    return menu;
+}
+
 var init = () => {
     currency = theory.createCurrency();
     quaternaryEntries = [];
@@ -236,6 +383,14 @@ var init = () => {
     theory.createPublicationUpgrade(0, currency, 1e8);
     theory.createBuyAllUpgrade(1, currency, 1e10);
     theory.createAutoBuyerUpgrade(2, currency, 1e13);
+
+    {
+        autoResetUpgrade = theory.createPermanentUpgrade(3, currency, new ConstantCost(1e200));
+        autoResetUpgrade.getDescription = (_) => "Unlock Auto-Reset";
+        autoResetUpgrade.getInfo = (_) => "Unlock a way to automate the reset of the particle";
+        autoResetUpgrade.maxLevel = 1;
+    }
+
     {
         pubTimeOverlay = theory.createPermanentUpgrade(11, currency, new FreeCost);
         pubTimeOverlay.getDescription = () => `Publication time: ${getTimeString(pubTime)}`;
@@ -431,6 +586,11 @@ var tick = (elapsedTime, multiplier) => {
 
     if (stage === 1) theory.invalidateSecondaryEquation();
     theory.invalidateQuaternaryValues();
+
+    if (autoResetUpgrade.level > 0 && isAutoResetEnabled && autoResetThresold > 1.05 && getvxmultiplier() > autoResetThresold)
+    {
+        resetSimulation();
+    }
 }
 
 var getPrimaryEquation = () => {
@@ -481,9 +641,9 @@ var getSecondaryEquation = () => {
     }
     else
     {
-        theory.secondaryEquationHeight = 110;
-        theory.secondaryEquationScale = 1;
-        result += `\\mkern 70mu \\begin{matrix}`
+        theory.secondaryEquationHeight = 80;
+        theory.secondaryEquationScale = 1.1;
+        result += `\\begin{matrix}`
         if (velocityTerm.level > 0)
         {
             result += `v = \\sqrt{{v_x}^2+{v_y}^2+{v_z}^2}\\\\`;
@@ -491,9 +651,6 @@ var getSecondaryEquation = () => {
         
         result += `C = ${numberFormat(C, 2)}\\\\`;
         result += `\\end{matrix}\\\\`
-        result += `\\text{Reset } x \\text{ to multiply } v_x \\text{ by }${getvxmultiplier()}\\\\`
-        if(velocityTerm.level > 0) result += `\\text{Reset } x \\text{ to multiply } v \\text{ by } ${getvmultiplier()}`
-        
     }
 
     return result;
@@ -539,8 +696,8 @@ var getQuaternaryEntries = () => {
             quaternaryEntries.push(new QuaternaryEntry(null, ''));
             quaternaryEntries.push(new QuaternaryEntry("t_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("\\dot{\\rho}_{{}\\,}", null));
-            quaternaryEntries.push(new QuaternaryEntry("x_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("\\omega_{{}\\,}", null));
+            quaternaryEntries.push(new QuaternaryEntry("x_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry("v_{{}\\,}", null));
             quaternaryEntries.push(new QuaternaryEntry(null, ''));
         }
@@ -560,8 +717,8 @@ var getQuaternaryEntries = () => {
     {
         quaternaryEntries[1].value = t.toString(2);
         quaternaryEntries[2].value = numberFormat(rhodot, 2);
-        quaternaryEntries[3].value = numberFormat(x, 2);
-        quaternaryEntries[4].value = numberFormat(omega, 2);
+        quaternaryEntries[3].value = numberFormat(omega, 2);
+        quaternaryEntries[4].value = numberFormat(x, 2);
         if (velocityTerm.level == 1) {quaternaryEntries[5].value = numberFormat(vtot, 3);}
     }
 
@@ -587,15 +744,6 @@ var goToNextStage = () => {
   quaternaryEntries = [];
   theory.invalidateQuaternaryValues();
 };
-
-var canResetStage = () => true;
-
-const resetMessage1 = "Resets x and updates vx with the latest values of v1 and v2."
-const resetMessage2 = "Resets x and updates vx, vy and vz with the latest values of v1, v2, v3 and v4."
-
-var getResetStageMessage = () => velocityTerm.level > 0 ? resetMessage2 : resetMessage1
-
-var resetStage = () => resetSimulation();
 
 var getPublicationMultiplier = (tau) => tau.pow(pubExponent);
 var getPublicationMultiplierFormula = (symbol) => `${symbol}^{${pubExponent}}`;
@@ -624,7 +772,7 @@ var postPublish = () => {
 
 var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
 
-var getInternalState = () => `${x.toNumber()} ${vx.toNumber()} ${vz.toNumber()} ${vtot.toNumber()} ${I.toNumber()} ${t} ${ts} ${pubTime} ${resetTime}`;
+var getInternalState = () => `${x.toNumber()} ${vx.toNumber()} ${vz.toNumber()} ${vtot.toNumber()} ${I.toNumber()} ${t} ${ts} ${pubTime} ${resetTime} ${isAutoResetEnabled} ${autoResetThresold}`;
 
 var setInternalState = (state) => {
     let values = state.split(" ");
@@ -636,7 +784,9 @@ var setInternalState = (state) => {
     if (values.length > 5) t = parseBigNumber(values[5]);
     if (values.length > 6) ts = parseBigNumber(values[6]);
     if (values.length > 7) pubTime = Number(values[7]);
-    if (values.length > 8) pubTime = Number(values[8]);
+    if (values.length > 8) resetTime = Number(values[8]);
+    if (values.length > 9) isAutoResetEnabled = values[9] == "true";
+    if (values.length > 10) autoResetThresold = Number(values[10]);
   
     updateC();
   };
