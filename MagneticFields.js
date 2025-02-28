@@ -14,11 +14,11 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.5.2"
+"Version 0.5.3"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!\n"+
 "Special thanks to prop for helping me with parts of the code.";
-var version = 0.4;
+var version = 0.5;
 
 const tauRate = 1;
 const pubExponent = 0.17;
@@ -532,7 +532,7 @@ var init = () => {
 
     let story6 = "The magnetic fields project paid off\n"
     story6 += "You finally did it, you reached 1e600τ!\n"
-    story6 += "You decide to organise a small party with the physics students that help you throuhout your journey.\n"
+    story6 += "You decide to organize a small party with the physics students that helped you throughout your journey.\n"
     story6 += "That was a long investment, but you feel like it was worth it.\n"
     story6 += "You miss pure mathematics but, at the same time, you want to explore more physics domains.\n"
     story6 += "One thing you're certain, is that this project marked a big step in your life.\n"
