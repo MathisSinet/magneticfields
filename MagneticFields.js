@@ -58,7 +58,7 @@ var pubTime = 0;
 var resetTime = 0;
 
 var isAutoResetEnabled = false;
-var autoResetThresold = 2;
+var autoResetThreshold = 2;
 
 var chapter1, chapter2, chapter3, chapter4, chapter5, chapter6;
 
@@ -196,7 +196,7 @@ var getEquationOverlay = () =>
 }
 
 var createResetMenu = () => {
-    let tmpThreshold = autoResetThresold;
+    let tmpThreshold = autoResetThreshold;
 
     let autoResetSwitch = ui.createSwitch
     ({
@@ -232,7 +232,7 @@ var createResetMenu = () => {
         onClicked: () =>
         {
             Sound.playClick();
-            autoResetThresold = tmpThreshold;
+            autoResetThreshold = tmpThreshold;
         },
         isVisible: autoResetUpgrade.level > 0
     })
@@ -592,7 +592,7 @@ var tick = (elapsedTime, multiplier) => {
 
     theory.invalidateQuaternaryValues();
 
-    if (autoResetUpgrade.level > 0 && isAutoResetEnabled && autoResetThresold > 1.05 && getvxmultiplier() >= autoResetThresold)
+    if (autoResetUpgrade.level > 0 && isAutoResetEnabled && autoResetThreshold > 1.05 && getvxmultiplier() >= autoResetThreshold)
     {
         resetSimulation();
     }
@@ -784,7 +784,7 @@ var postPublish = () => {
 
 var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
 
-var getInternalState = () => `${x.toNumber()} ${vx.toNumber()} ${vz.toNumber()} ${vtot.toNumber()} ${I.toNumber()} ${t} ${ts} ${pubTime} ${resetTime} ${isAutoResetEnabled} ${autoResetThresold}`;
+var getInternalState = () => `${x.toNumber()} ${vx.toNumber()} ${vz.toNumber()} ${vtot.toNumber()} ${I.toNumber()} ${t} ${ts} ${pubTime} ${resetTime} ${isAutoResetEnabled} ${autoResetThreshold}`;
 
 var setInternalState = (state) => {
     let values = state.split(" ");
@@ -798,7 +798,7 @@ var setInternalState = (state) => {
     if (values.length > 7) pubTime = Number(values[7]);
     if (values.length > 8) resetTime = Number(values[8]);
     if (values.length > 9) isAutoResetEnabled = values[9] == "true";
-    if (values.length > 10) autoResetThresold = Number(values[10]);
+    if (values.length > 10) autoResetThreshold = Number(values[10]);
   
     updateC();
   };
