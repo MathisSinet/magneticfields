@@ -4,7 +4,6 @@ import { BigNumber } from "../api/BigNumber";
 import { theory, QuaternaryEntry } from "../api/Theory";
 import { Utils } from "../api/Utils";
 import { ui } from "../api/ui/UI";
-import { log } from "winjs";
 
 var id = "magnetic_fields";
 var name = "Magnetic Fields";
@@ -14,7 +13,7 @@ var description =
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
 "Have fun!\n"+
-"Version 0.5.3"
+"Version 0.5.4"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!\n"+
 "Special thanks to prop for helping me with parts of the code.";
@@ -530,7 +529,7 @@ var init = () => {
     story5 += "More variables have exponents to be tinkered with...\n"
     chapter5 = theory.createStoryChapter(4, "Reconsideration", story5, () => vExp.level > 0);
 
-    let story6 = "The magnetic fields project paid off\n"
+    let story6 = "The magnetic fields project paid off.\n"
     story6 += "You finally did it, you reached 1e600τ!\n"
     story6 += "You decide to organize a small party with the physics students that helped you throughout your journey.\n"
     story6 += "That was a long investment, but you feel like it was worth it.\n"
