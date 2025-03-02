@@ -4,6 +4,9 @@ import { BigNumber } from "../api/BigNumber";
 import { theory, QuaternaryEntry } from "../api/Theory";
 import { Utils } from "../api/Utils";
 import { ui } from "../api/ui/UI";
+import { Color } from "../api/ui/properties/Color";
+import { FontAttributes } from "../api/ui/properties/FontAttributes";
+import { Thickness } from "../api/ui/properties/Thickness";
 
 var id = "magnetic_fields";
 var name = "Magnetic Fields";
@@ -156,21 +159,57 @@ var getvmultiplier = () => {
     return (vxn.pow(BigNumber.TWO) + vzn.pow(BigNumber.TWO)).sqrt() / vtot;
 }
 
-
-const resetButton = ui.createButton(
-    {
-        text:"↺",
+var createResetFrame = () => {
+    let triggerable = true;
+    let frame = ui.createFrame({
         margin: new Thickness(1),
         padding: new Thickness(1),
-        fontSize: ui.screenHeight / 46,
-        widthRequest: ui.screenWidth / 12,
-        heightRequest: ui.screenHeight / 26,
-        onReleased: () => {
-            Sound.playClick();
-            createResetMenu().show();
+        hasShadow: true,
+        widthRequest: ui.screenWidth / 11,
+        heightRequest: ui.screenHeight / 24,
+        borderColor: Color.BORDER,
+        content: ui.createLabel({
+            margin: new Thickness(0, 0, 0, 0),
+            padding: new Thickness(0, 0, 0, 0),
+            text:"↺",
+            fontAttributes: FontAttributes.BOLD,
+            horizontalTextAlignment: TextAlignment.CENTER,
+            verticalTextAlignment: TextAlignment.END,
+            fontSize: ui.screenHeight / 30,
+            widthRequest: ui.screenWidth / 11,
+            heightRequest: ui.screenHeight / 24,
+        })
+    })
+
+    frame.onTouched = (e) =>
+    {
+        if(e.type == TouchType.PRESSED)
+        {
+            frame.borderColor = Color.TRANSPARENT;
         }
-    }
-)
+        else if(e.type.isReleased())
+        {
+            frame.borderColor = Color.BORDER;
+            if(triggerable)
+            {
+                Sound.playClick();
+                createResetMenu().show();
+            }
+            else
+                triggerable = true;
+        }
+        else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
+        e.x > frame.width || e.y > frame.height))
+        {
+            frame.borderColor = Color.BORDER;
+            triggerable = false;
+        }
+    };
+
+    return frame;
+}
+
+const resetFrame = createResetFrame();
 
 var getEquationOverlay = () =>
 {
@@ -190,7 +229,7 @@ var getEquationOverlay = () =>
                 cascadeInputTransparent: false,
                 children:
                 [
-                    resetButton
+                    resetFrame
                 ]
             }),
         ]
