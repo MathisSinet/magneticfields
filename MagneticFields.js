@@ -59,7 +59,8 @@ var chapter1, chapter2, chapter3, chapter4, chapter5, chapter6;
 
 let endtau = BigNumber.from("1e600")
 
-var numberFormat = (value, decimals) => {
+
+var numberFormat = (value, decimals, negExpFlag=false) => {
     if (value >= BigNumber.ZERO)
     {
         if (value >= BigNumber.from(0.1) || value == BigNumber.ZERO) 
@@ -74,7 +75,14 @@ var numberFormat = (value, decimals) => {
         {
             let exp = Math.floor((value*BigNumber.from(1+1e-5)).log10().toNumber());
             let mts = (value * BigNumber.TEN.pow(-exp)).toString(decimals);
-            return `${mts}e${exp}`;
+            if (exp > 0 || !negExpFlag)
+            {
+                return `${mts}e${exp}`;
+            }
+            else
+            {
+                return `${mts}e$\\,-$${-exp}`;
+            }
         }
     }
     else
@@ -177,7 +185,7 @@ var getEquationOverlay = () =>
                 row: 0, column: 0,
                 margin: new Thickness(4),
                 horizontalOptions: LayoutOptions.START,
-                verticalOptions: LayoutOptions.END,
+                verticalOptions: LayoutOptions.START,
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children:
@@ -207,9 +215,9 @@ var createResetMenu = () => {
                 ui.createLatexLabel
                 ({
                     margin: new Thickness(0, 0, 0, 6),
-                    text: () => `$x: ${numberFormat(x, 2)}\\rightarrow 0$ \\\\`+
-                    `$v_x: ${numberFormat(vx, 2)}\\rightarrow${numberFormat(vx*getvxmultiplier(),2)}\\,(\\times${numberFormat(getvxmultiplier(), 2)})$ \\\\`+
-                    (velocityTerm.level > 0 ? `$v: ${numberFormat(vtot, 2)}\\rightarrow${numberFormat(vtot*getvmultiplier(),2)}\\,(\\times${numberFormat(getvmultiplier(), 2)})$` : ""),
+                    text: () => `$x: ${numberFormat(x, 2, true)}\\rightarrow 0$ \\\\`+
+                    `$v_x: ${numberFormat(vx, 2, true)}\\rightarrow${numberFormat(vx*getvxmultiplier(), 2, true)}\\,(\\times${numberFormat(getvxmultiplier(), 2, true)})$ \\\\`+
+                    (velocityTerm.level > 0 ? `$v: ${numberFormat(vtot, 2, true)}\\rightarrow${numberFormat(vtot*getvmultiplier(), 2, true)}\\,(\\times${numberFormat(getvmultiplier(), 2, true)})$` : ""),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     verticalTextAlignment: TextAlignment.CENTER
                 }),
