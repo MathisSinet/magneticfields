@@ -179,8 +179,6 @@ var createResetFrame = () => {
             fontAttributes: FontAttributes.BOLD,
             horizontalTextAlignment: TextAlignment.CENTER,
             verticalTextAlignment: TextAlignment.END,
-            verticalOptions: LayoutOptions.CENTER,
-            horizontalOptions: LayoutOptions.CENTER,
             fontSize: fontSize,
             widthRequest: textSize,
             heightRequest: textSize,
