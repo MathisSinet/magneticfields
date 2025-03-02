@@ -7,6 +7,7 @@ import { ui } from "../api/ui/UI";
 import { Color } from "../api/ui/properties/Color";
 import { FontAttributes } from "../api/ui/properties/FontAttributes";
 import { Thickness } from "../api/ui/properties/Thickness";
+import { LayoutOptions } from "../api/ui/properties/LayoutOptions";
 
 var id = "magnetic_fields";
 var name = "Magnetic Fields";
@@ -161,23 +162,28 @@ var getvmultiplier = () => {
 
 var createResetFrame = () => {
     let triggerable = true;
+    let textSize = ui.screenWidth / 11;
+    let fontSize = textSize * 0.9;
     let frame = ui.createFrame({
-        margin: new Thickness(1),
-        padding: new Thickness(1),
+        margin: new Thickness(0),
+        padding: new Thickness(0),
         hasShadow: true,
-        widthRequest: ui.screenWidth / 11,
-        heightRequest: ui.screenHeight / 24,
-        borderColor: Color.BORDER,
+        widthRequest: textSize,
+        heightRequest: textSize,
+        borderColor: Color.TRANSPARENT,
         content: ui.createLabel({
             margin: new Thickness(0, 0, 0, 0),
             padding: new Thickness(0, 0, 0, 0),
-            text:"↺",
+            text: "↺",
+            textColor: Color.TEXT_MEDIUM,
             fontAttributes: FontAttributes.BOLD,
             horizontalTextAlignment: TextAlignment.CENTER,
             verticalTextAlignment: TextAlignment.END,
-            fontSize: ui.screenHeight / 30,
-            widthRequest: ui.screenWidth / 11,
-            heightRequest: ui.screenHeight / 24,
+            verticalOptions: LayoutOptions.CENTER,
+            horizontalOptions: LayoutOptions.CENTER,
+            fontSize: fontSize,
+            widthRequest: textSize,
+            heightRequest: textSize,
         })
     })
 
@@ -185,11 +191,11 @@ var createResetFrame = () => {
     {
         if(e.type == TouchType.PRESSED)
         {
-            frame.borderColor = Color.TRANSPARENT;
+            frame.backgroundColor = Color.SWITCH_BACKGROUND;
         }
         else if(e.type.isReleased())
         {
-            frame.borderColor = Color.BORDER;
+            frame.backgroundColor = Color.TRANSPARENT;
             if(triggerable)
             {
                 Sound.playClick();
@@ -201,7 +207,7 @@ var createResetFrame = () => {
         else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
         e.x > frame.width || e.y > frame.height))
         {
-            frame.borderColor = Color.BORDER;
+            frame.backgroundColor = Color.SWITCH_BACKGROUND;
             triggerable = false;
         }
     };
