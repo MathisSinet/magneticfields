@@ -251,7 +251,7 @@ var createResetMenu = () => {
                 ui.createLatexLabel
                 ({
                     margin: new Thickness(0, 0, 0, 6),
-                    text: "After resetting of the particle, you will have:",
+                    text: "After resetting the particle, you will have:",
                     horizontalTextAlignment: TextAlignment.CENTER,
                     verticalTextAlignment: TextAlignment.CENTER
                 }),
