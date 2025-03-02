@@ -12,12 +12,13 @@ var description =
 "Discover the equations that describe the movement of a charged particle inside a solenoid of infinite length.\n"+
 "Watch how rho grows as the particle moves away from its starting position and the magnetic field becomes stronger.\n"+
 "Reset the particle's position to update its velocity to increase your long-term benefits.\n"+
-"Have fun!\n"+
-"Version 0.5.4"
+"Have fun!\n"
 var authors = "Mathis S.\n" +
 "Thanks to the amazing Exponential Idle community for their support and feedback on this theory!\n"+
 "Special thanks to prop for helping me with parts of the code.";
-var version = 0.5;
+var version = 1;
+
+requiresGameVersion("1.4.38");
 
 const tauRate = 1;
 const pubExponent = 0.17;
@@ -46,19 +47,13 @@ var omega = BigNumber.ZERO;
 var B = BigNumber.ZERO;
 
 var t = BigNumber.ZERO;
-//var t_dot = BigNumber.ZERO;
 var ts = BigNumber.ZERO;
 var C = BigNumber.ZERO;
 
-//var resetUpgrade;
-var c1, c2, v1, v2, v3, v4, a1, a2, delta;
-var autoResetUpgrade;
+var c1, c2, a1, a2, delta, v1, v2, v3, v4;
 
 var pubTime = 0;
 var resetTime = 0;
-
-var isAutoResetEnabled = false;
-var autoResetThreshold = 2;
 
 var chapter1, chapter2, chapter3, chapter4, chapter5, chapter6;
 
@@ -196,53 +191,10 @@ var getEquationOverlay = () =>
 }
 
 var createResetMenu = () => {
-    let tmpThreshold = autoResetThreshold;
-
-    let autoResetSwitch = ui.createSwitch
-    ({
-        row: 0, column: 1,
-        horizontalOptions: LayoutOptions.END,
-        isToggled: isAutoResetEnabled,
-        onToggled: () =>
-        {
-            Sound.playClick();
-            isAutoResetEnabled = autoResetSwitch.isToggled;
-        }
-    });
-
-    let thresholdEntry = ui.createEntry
-    ({
-        row: 0, column: 0,
-        text: tmpThreshold.toString(),
-        placeholder: '2',
-        placeholderColor: Color.TEXT_MEDIUM,
-        keyboard: Keyboard.NUMERIC,
-        horizontalTextAlignment: TextAlignment.END,
-        onTextChanged: (ot, nt) =>
-        {
-            let tmpML = parseFloat(nt) ?? tmpThreshold;
-            if(isNaN(tmpML) || tmpML < 1.1 || tmpML > 100)
-                tmpML = 2;
-            tmpThreshold = tmpML;
-        }
-    });
-    let saveBtn = ui.createButton
-    ({
-        text: "Save",
-        onClicked: () =>
-        {
-            Sound.playClick();
-            autoResetThreshold = tmpThreshold;
-        },
-        isVisible: autoResetUpgrade.level > 0
-    })
-
-    let menu = ui.createPopup(
-    {
+    let menu = ui.createPopup({
         isPeekable: true,
         title: "Reset Particle Menu",
-        content: ui.createStackLayout(
-        {
+        content: ui.createStackLayout({
             children:
             [
                 ui.createLatexLabel
@@ -266,31 +218,10 @@ var createResetMenu = () => {
                     margin: new Thickness(0, 0, 0, 6),
                     text: () => "Reset now",
                     onReleased: () => resetSimulation()
-                }),
-                ui.createLatexLabel
-                ({
-                    margin: new Thickness(0, 0, 0, 6),
-                    text: () => `Automatically reset the particle to multiply $v_x$ by:`,
-                    horizontalTextAlignment: TextAlignment.CENTER,
-                    verticalTextAlignment: TextAlignment.CENTER,
-                    isVisible: autoResetUpgrade.level > 0,
-                }),
-                ui.createGrid
-                ({
-                    columnDefinitions: ['1*', 'auto'],
-                    children:
-                    [
-                        thresholdEntry,
-                        autoResetSwitch
-                    ],
-                    isVisible: autoResetUpgrade.level > 0
-                }),
-                saveBtn
+                })
             ]
-        }
-        )
-    }
-    )
+        })
+    })
 
     return menu;
 }
@@ -386,13 +317,6 @@ var init = () => {
     theory.createAutoBuyerUpgrade(2, currency, 1e13);
 
     {
-        autoResetUpgrade = theory.createPermanentUpgrade(3, currency, new ConstantCost(1e200));
-        autoResetUpgrade.getDescription = (_) => "Unlock Auto-Reset";
-        autoResetUpgrade.getInfo = (_) => "Unlock a way to automate the reset of the particle";
-        autoResetUpgrade.maxLevel = 1;
-    }
-
-    {
         pubTimeOverlay = theory.createPermanentUpgrade(11, currency, new FreeCost);
         pubTimeOverlay.getDescription = () => `Publication time: ${getTimeString(pubTime)}`;
         pubTimeOverlay.info = "Elapsed time since the last publication";
@@ -443,7 +367,6 @@ var init = () => {
 
     {
         omegaExp = theory.createMilestoneUpgrade(2, 2);
-        //omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")} ; ${Localization.getUpgradeMultCustomDesc("C", "1.15e5")}`;
         omegaExp.description = `${Localization.getUpgradeIncCustomExpDesc("{\\omega}", "0.15")}; $\\uparrow C$`;
         omegaExp.info = `${Localization.getUpgradeIncCustomExpInfo("{\\omega}", "0.15")} \\\\ ${Localization.getUpgradeMultCustomInfo("C", "1.15e5")}`;
         omegaExp.canBeRefunded = (_) => (xExp.level === 0);
@@ -458,7 +381,6 @@ var init = () => {
     {
         xExp = theory.createMilestoneUpgrade(3, 2);
         xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")}; $\\uparrow C$`;
-        //xExp.description = `${Localization.getUpgradeIncCustomExpDesc("x", "0.1")} ; ${Localization.getUpgradeMultCustomDesc("C", "22.9")}`;
         xExp.info = `${Localization.getUpgradeIncCustomExpInfo("x", "0.1")} \\\\ ${Localization.getUpgradeMultCustomInfo("C", "22.9")}`
         xExp.canBeRefunded = (_) => (vExp.level === 0);
         xExp.boughtOrRefunded = (_) => {
@@ -472,7 +394,6 @@ var init = () => {
     {
         vExp = theory.createMilestoneUpgrade(4, 2);
         vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")}; $\\uparrow C$`;
-        //vExp.description = `${Localization.getUpgradeIncCustomExpDesc("v", "0.31")} ; ${Localization.getUpgradeMultCustomDesc("C", "35.5")}`;
         vExp.info = `${Localization.getUpgradeIncCustomExpInfo("v", "0.31")} \\\\ ${Localization.getUpgradeMultCustomInfo("C", "35.5")}`;
         vExp.canBeRefunded = (_) => (a1Exp.level === 0)
         vExp.boughtOrRefunded = (_) => {
@@ -515,7 +436,7 @@ var init = () => {
     let story4 = "The theory keeps working its way forward, however it is slowing down quite a bit.\n"
     story4 += "You start wondering: Was the physics student's project to grow τ flawed?\n"
     story4 += "Can the theory really reach higher limits?\n"
-    story4 += "You start looking closer at the exponents of x and ω.\n"
+    story4 += "You start looking closer at the exponents of ω and x.\n"
     story4 += "Right! Increasing them would be a nice idea to progress further.\n"
     story4 += "It's time for the old exponent trick.\n"
     chapter4 = theory.createStoryChapter(3, "An old trick", story4, () => omegaExp.level > 0);
@@ -591,11 +512,6 @@ var tick = (elapsedTime, multiplier) => {
     currency.value += rhodot * BigNumber.from(elapsedTime);
 
     theory.invalidateQuaternaryValues();
-
-    if (autoResetUpgrade.level > 0 && isAutoResetEnabled && autoResetThreshold > 1.05 && getvxmultiplier() >= autoResetThreshold)
-    {
-        resetSimulation();
-    }
 }
 
 var getPrimaryEquation = () => {
@@ -784,7 +700,7 @@ var postPublish = () => {
 
 var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
 
-var getInternalState = () => `${x.toNumber()} ${vx.toNumber()} ${vz.toNumber()} ${vtot.toNumber()} ${I.toNumber()} ${t} ${ts} ${pubTime} ${resetTime} ${isAutoResetEnabled} ${autoResetThreshold}`;
+var getInternalState = () => `${x.toNumber()} ${vx.toNumber()} ${vz.toNumber()} ${vtot.toNumber()} ${I.toNumber()} ${t} ${ts} ${pubTime} ${resetTime}`;
 
 var setInternalState = (state) => {
     let values = state.split(" ");
@@ -797,8 +713,6 @@ var setInternalState = (state) => {
     if (values.length > 6) ts = parseBigNumber(values[6]);
     if (values.length > 7) pubTime = Number(values[7]);
     if (values.length > 8) resetTime = Number(values[8]);
-    if (values.length > 9) isAutoResetEnabled = values[9] == "true";
-    if (values.length > 10) autoResetThreshold = Number(values[10]);
   
     updateC();
   };
