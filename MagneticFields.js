@@ -208,7 +208,7 @@ var createResetMenu = () => {
                 ui.createLatexLabel
                 ({
                     margin: new Thickness(0, 0, 0, 6),
-                    text: "After a reset of the particle, you will have:",
+                    text: "After resetting of the particle, you will have:",
                     horizontalTextAlignment: TextAlignment.CENTER,
                     verticalTextAlignment: TextAlignment.CENTER
                 }),
@@ -224,7 +224,7 @@ var createResetMenu = () => {
                 ui.createButton
                 ({
                     margin: new Thickness(0, 0, 0, 6),
-                    text: () => "Reset now",
+                    text: () => "Reset Now",
                     onReleased: () => resetSimulation()
                 })
             ]
