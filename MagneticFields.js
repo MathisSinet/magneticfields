@@ -258,7 +258,7 @@ var createResetMenu = () => {
                 ui.createLatexLabel
                 ({
                     margin: new Thickness(0, 0, 0, 6),
-                    text: () => `$x: ${numberFormat(x, 2, true)}\\rightarrow 0$ \\\\`+
+                    text: () => `$t_s: ${numberFormat(ts, 2)}\\rightarrow 0$ \\\\`+
                     `$v_x: ${numberFormat(vx, 2, true)}\\rightarrow${numberFormat(vx*getvxmultiplier(), 2, true)}\\,(\\times${numberFormat(getvxmultiplier(), 2, true)})$ \\\\`+
                     (velocityTerm.level > 0 ? `$v: ${numberFormat(vtot, 2, true)}\\rightarrow${numberFormat(vtot*getvmultiplier(), 2, true)}\\,(\\times${numberFormat(getvmultiplier(), 2, true)})$` : ""),
                     horizontalTextAlignment: TextAlignment.CENTER,
