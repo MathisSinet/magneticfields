@@ -163,38 +163,39 @@ var getvmultiplier = () => {
 
 var createResetFrame = () => {
     let triggerable = true;
-    let textSize = ui.screenWidth / 11;
-    let fontSize = textSize * 0.9;
-    let frame = ui.createFrame({
-        margin: new Thickness(0),
-        padding: new Thickness(0),
-        hasShadow: true,
-        widthRequest: textSize,
-        heightRequest: textSize,
-        borderColor: Color.TRANSPARENT,
-        content: ui.createLabel({
-            margin: new Thickness(0, 0, 0, 0),
-            padding: new Thickness(0, 0, 0, 0),
-            text: "↺",
-            textColor: Color.TEXT_MEDIUM,
-            fontAttributes: FontAttributes.BOLD,
-            horizontalTextAlignment: TextAlignment.CENTER,
-            verticalTextAlignment: TextAlignment.END,
-            fontSize: fontSize,
-            widthRequest: textSize,
-            heightRequest: textSize,
-        })
+    let fontSize = Math.min(ui.screenWidth / 13, ui.screenHeight / 18);
+    let targetWidth = 50;
+
+    let label = ui.createLabel({
+        margin: new Thickness(0, 0, 0, 0),
+        padding: new Thickness(2, 0, 10, 10),
+        text: "↺",
+        textColor: Color.TEXT_MEDIUM,
+        fontAttributes: FontAttributes.BOLD,
+        horizontalTextAlignment: TextAlignment.CENTER,
+        verticalTextAlignment: TextAlignment.END,
+        fontSize: fontSize,
+        opacity: 0,
     })
 
-    frame.onTouched = (e) =>
+    let adjustmentDone = false;
+    label.onSizeChanged = () => {
+        if (!adjustmentDone && label.width > 0) {
+            label.fontSize = fontSize * targetWidth / label.width;
+            label.opacity = 1;
+            adjustmentDone = true;
+        }
+    };
+
+    label.onTouched = (e) =>
     {
         if(e.type == TouchType.PRESSED)
         {
-            frame.backgroundColor = Color.SWITCH_BACKGROUND;
+            label.opacity = 0.4;
         }
         else if(e.type.isReleased())
         {
-            frame.backgroundColor = Color.TRANSPARENT;
+            label.opacity = 1;
             if(triggerable)
             {
                 Sound.playClick();
@@ -204,14 +205,14 @@ var createResetFrame = () => {
                 triggerable = true;
         }
         else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
-        e.x > frame.width || e.y > frame.height))
+        e.x > label.width || e.y > label.height))
         {
-            frame.backgroundColor = Color.SWITCH_BACKGROUND;
+            label.opacity = 0.4;
             triggerable = false;
         }
     };
 
-    return frame;
+    return label;
 }
 
 const resetFrame = createResetFrame();
